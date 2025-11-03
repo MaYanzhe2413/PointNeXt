@@ -1,0 +1,1 @@
+python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnet++_original.yaml mode test

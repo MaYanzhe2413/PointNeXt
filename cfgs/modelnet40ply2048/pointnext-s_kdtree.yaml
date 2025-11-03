@@ -1,0 +1,59 @@
+# PointNeXt-S with KDTree Sampling for ModelNet40
+# Based on the original PointNeXt-S configuration with KDTree sampling integration
+# Performance improvements expected due to efficient spatial sampling
+
+# Original PointNeXt-S Performance:
+# GFLOPs: 1.64, GMACs: 0.81, Params: 1.374M
+# Throughput: ~2033 ins./s
+
+# KDTree Enhanced Configuration:
+# - Replaces FPS with KDTree-based leaf node FPS sampling
+# - Expected ~128x speedup in sampling phase
+# - Maintains spatial quality while improving efficiency
+
+model:
+  NAME: BaseCls
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1, 1]            # 6层结构
+    strides: [1, 2, 2, 2, 2, 1]           # 下采样比率
+    width: 32                             # 基础通道数
+    in_channels: 3                        # 输入维度 (x, y, z)
+    radius: 0.15                          # 球查询半径
+    radius_scaling: 1.5                   # 半径缩放因子
+    sa_layers: 2                          # Set Abstraction层数
+    sa_use_res: True                      # 使用残差连接
+    nsample: 32                           # 邻居采样数
+    expansion: 4                          # MLP扩展因子
+    sampler: kdtree                       # 🌳 使用KDTree采样 (关键配置)
+    aggr_args:
+      feature_type: 'dp_fj'               # 特征类型：距离+位置+特征+拼接
+      reduction: 'max'                    # 特征聚合方式
+    group_args:
+      NAME: 'ballquery'                   # 使用球查询分组
+      normalize_dp: True                  # 归一化距离-位置特征
+    conv_args:
+      order: conv-norm-act                # 卷积层顺序
+    act_args:
+      act: 'relu'                         # 激活函数
+    norm_args:
+      norm: 'bn'                          # 批归一化
+  cls_args: 
+    NAME: ClsHead
+    num_classes: 40                       # ModelNet40类别数
+    mlps: [512, 256]                      # 分类头MLP维度
+    norm_args: 
+      norm: 'bn1d'                        # 1D批归一化
+
+# KDTree采样相关配置 (隐式参数，在kdsample.py中定义)
+# kdtree_config:
+#   leaf_size: 32                        # 叶节点最大大小
+#   adaptive: False                      # 是否使用自适应采样
+#   density_aware: False                 # 是否考虑密度
+
+# 训练相关配置继承自默认配置
+# 预期改进:
+# 1. 采样阶段速度提升 ~128倍
+# 2. 保持原有分类精度
+# 3. 更好的空间分布均匀性
+# 4. 支持并行化处理 (32个叶节点并行)

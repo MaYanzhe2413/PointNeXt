@@ -1,0 +1,44 @@
+# PointNeXt-S with Simple KDTree (leaf random/uniform) Sampling
+# 只在叶节点做随机/均匀采样，不执行叶内FPS，进一步降低采样开销。
+
+model:
+  NAME: BaseCls
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1, 1]
+    strides: [1, 2, 2, 2, 2, 1]
+    width: 32
+    in_channels: 3
+    radius: 0.15
+    radius_scaling: 1.5
+    sa_layers: 2
+    sa_use_res: True
+    nsample: 32
+    expansion: 4
+    sampler: kdtree_simple   # 使用新简单采样器
+    sampler_args:
+      leaf_size: 32          # 叶节点最大点数
+      strategy: random       # random | uniform
+      proportional: true     # 是否按叶点数比例分配
+    aggr_args:
+      feature_type: 'dp_fj'
+      reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  cls_args:
+    NAME: ClsHead
+    num_classes: 40
+    mlps: [512, 256]
+    norm_args:
+      norm: 'bn1d'
+
+# 采样策略说明:
+# kdtree_simple: 每个叶节点(<=leaf_size, 默认32)内随机或均匀抽取 quota 点, quota 按叶节点点数比例分配并全局一次调平。
+# 环境变量可通过修改 kdsample.py 中 kdtree_simple_sample 的默认参数来切换 random / uniform。

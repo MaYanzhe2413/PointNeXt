@@ -1,0 +1,59 @@
+# PointNeXt-S with Adaptive KDTree Sampling
+# Advanced version with density-aware adaptive sampling
+# Optimized for complex point cloud distributions
+
+model:
+  NAME: BaseCls
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1, 1]           # 标准6层结构
+    strides: [1, 2, 2, 2, 2, 1]          # 下采样策略
+    width: 32                            # 基础通道数
+    in_channels: 3                       # 输入维度
+    radius: 0.15                         # 球查询半径
+    radius_scaling: 1.5                  # 半径缩放
+    sa_layers: 2                         # Set Abstraction层数
+    sa_use_res: True                     # 残差连接
+    nsample: 32                          # 邻居数量
+    expansion: 4                         # MLP扩展
+    sampler: kdtree_adaptive             # 🧠 自适应KDTree采样
+    aggr_args:
+      feature_type: 'dp_fj'              # 完整特征类型
+      reduction: 'max'                   # 最大池化
+    group_args:
+      NAME: 'ballquery'                  # 球查询
+      normalize_dp: True                 # 特征归一化
+    conv_args:
+      order: conv-norm-act               # 标准卷积顺序
+    act_args:
+      act: 'relu'                        # ReLU激活
+    norm_args:
+      norm: 'bn'                         # 批归一化
+  cls_args: 
+    NAME: ClsHead
+    num_classes: 40                      # ModelNet40分类
+    mlps: [512, 256]                     # 分类头维度
+    norm_args: 
+      norm: 'bn1d'                       # 1D批归一化
+
+# 高级KDTree配置说明:
+# 
+# 🧠 自适应采样特性:
+# - 密度感知: 高密度区域采样更多点
+# - 几何感知: 曲率高的区域优先采样
+# - 边界保护: 物体边界区域重点采样
+# 
+# 🌳 KDTree结构优化:
+# - 动态叶节点大小: 根据局部密度调整
+# - 多尺度分析: 不同层次使用不同leaf_size
+# - 负载均衡: 确保各叶节点采样数量平衡
+#
+# ⚡ 性能优化:
+# - 并行处理: 32-64个叶节点并行
+# - 内存优化: 减少中间tensor存储
+# - 缓存机制: 重用KDTree结构
+#
+# 🎯 适用场景:
+# - 复杂几何形状 (如椅子、飞机)
+# - 不均匀密度分布
+# - 精细特征保持要求高的任务
