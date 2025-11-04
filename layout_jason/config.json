@@ -1,0 +1,42 @@
+{
+  "run_name": "demo_run",
+  "output_dir": "demo_pointnet\\results",
+  "stages": [
+    {
+      "type": "fps",
+      "name": "fps_stage",
+      "points_file": "demo_pointnet\\points.npy",
+      "params": {
+        "num_points": 64,
+        "num_samples": 16,
+        "point_dims": 3,
+        "idx_offset": 0,
+        "xyz_offset": 1000,
+        "dist_offset": 2000,
+        "output_idx_offset": 3000
+      }
+    },
+    {
+      "type": "mlp",
+      "name": "mlp_stage",
+      "neighborhood_idx_file": "demo_pointnet\\neigh.npy",
+      "adapter": {
+        "num_filters": 8,
+        "ifmap_offset": 0,
+        "ifmap_elem_bytes": 4,
+        "filter_offset": 5000,
+        "filter_elem_bytes": 4,
+        "ofmap_offset": 8000,
+        "ofmap_elem_bytes": 4
+      },
+      "scale_config": {
+        "array_rows": 4,
+        "array_cols": 4,
+        "ifmap_sz_kb": 64,
+        "filter_sz_kb": 64,
+        "ofmap_sz_kb": 64,
+        "df": "ws"
+      }
+    }
+  ]
+}
