@@ -1,0 +1,1168 @@
+{
+  "network_name": "pointnext-s",
+  "total_parameters": 1373512,
+  "trainable_parameters": 1373512,
+  "total_layers": 90,
+  "layers": [
+    {
+      "name": "root",
+      "type": "BaseCls",
+      "depth": 0,
+      "trainable_params": 1373512,
+      "total_params": 1373512,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder",
+      "type": "PointNextEncoder",
+      "depth": 1,
+      "trainable_params": 968480,
+      "total_params": 968480,
+      "in_channels": 512,
+      "out_channels": 512,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder",
+      "type": "Sequential",
+      "depth": 2,
+      "trainable_params": 968480,
+      "total_params": 968480,
+      "has_children": true,
+      "num_children": 6
+    },
+    {
+      "name": "encoder.encoder.0",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 128,
+      "total_params": 128,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.0.0",
+      "type": "SetAbstraction",
+      "depth": 4,
+      "trainable_params": 128,
+      "total_params": 128,
+      "stride": 1,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.0.0.convs",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 128,
+      "total_params": 128,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.0.0.convs.0",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 128,
+      "total_params": 128,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.0.0.convs.0.0",
+      "type": "Conv1d",
+      "depth": 7,
+      "trainable_params": 128,
+      "total_params": 128,
+      "in_channels": 3,
+      "out_channels": 32,
+      "kernel_size": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "padding": [
+        0
+      ],
+      "groups": 1,
+      "has_bias": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 5472,
+      "total_params": 5472,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.1.0",
+      "type": "SetAbstraction",
+      "depth": 4,
+      "trainable_params": 5472,
+      "total_params": 5472,
+      "stride": 2,
+      "has_children": true,
+      "num_children": 4
+    },
+    {
+      "name": "encoder.encoder.1.0.skipconv",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 2112,
+      "total_params": 2112,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.1.0.skipconv.0",
+      "type": "Conv1d",
+      "depth": 6,
+      "trainable_params": 2112,
+      "total_params": 2112,
+      "in_channels": 32,
+      "out_channels": 64,
+      "kernel_size": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "padding": [
+        0
+      ],
+      "groups": 1,
+      "has_bias": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.act",
+      "type": "ReLU",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.convs",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 3360,
+      "total_params": 3360,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.0",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 1184,
+      "total_params": 1184,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.0.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 1120,
+      "total_params": 1120,
+      "in_channels": 35,
+      "out_channels": 32,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.0.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 64,
+      "total_params": 64,
+      "has_bias": true,
+      "num_features": 32,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.0.2",
+      "type": "ReLU",
+      "depth": 7,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.1",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 2176,
+      "total_params": 2176,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.1.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 2048,
+      "total_params": 2048,
+      "in_channels": 32,
+      "out_channels": 64,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.convs.1.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 128,
+      "total_params": 128,
+      "has_bias": true,
+      "num_features": 64,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.1.0.grouper",
+      "type": "QueryAndGroup",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 21184,
+      "total_params": 21184,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.2.0",
+      "type": "SetAbstraction",
+      "depth": 4,
+      "trainable_params": 21184,
+      "total_params": 21184,
+      "stride": 2,
+      "has_children": true,
+      "num_children": 4
+    },
+    {
+      "name": "encoder.encoder.2.0.skipconv",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 8320,
+      "total_params": 8320,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.2.0.skipconv.0",
+      "type": "Conv1d",
+      "depth": 6,
+      "trainable_params": 8320,
+      "total_params": 8320,
+      "in_channels": 64,
+      "out_channels": 128,
+      "kernel_size": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "padding": [
+        0
+      ],
+      "groups": 1,
+      "has_bias": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.act",
+      "type": "ReLU",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.convs",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 12864,
+      "total_params": 12864,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.0",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 4416,
+      "total_params": 4416,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.0.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 4288,
+      "total_params": 4288,
+      "in_channels": 67,
+      "out_channels": 64,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.0.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 128,
+      "total_params": 128,
+      "has_bias": true,
+      "num_features": 64,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.0.2",
+      "type": "ReLU",
+      "depth": 7,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.1",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 8448,
+      "total_params": 8448,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.1.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 8192,
+      "total_params": 8192,
+      "in_channels": 64,
+      "out_channels": 128,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.convs.1.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 256,
+      "total_params": 256,
+      "has_bias": true,
+      "num_features": 128,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.2.0.grouper",
+      "type": "QueryAndGroup",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 83328,
+      "total_params": 83328,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.3.0",
+      "type": "SetAbstraction",
+      "depth": 4,
+      "trainable_params": 83328,
+      "total_params": 83328,
+      "stride": 2,
+      "has_children": true,
+      "num_children": 4
+    },
+    {
+      "name": "encoder.encoder.3.0.skipconv",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 33024,
+      "total_params": 33024,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.3.0.skipconv.0",
+      "type": "Conv1d",
+      "depth": 6,
+      "trainable_params": 33024,
+      "total_params": 33024,
+      "in_channels": 128,
+      "out_channels": 256,
+      "kernel_size": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "padding": [
+        0
+      ],
+      "groups": 1,
+      "has_bias": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.act",
+      "type": "ReLU",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.convs",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 50304,
+      "total_params": 50304,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.0",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 17024,
+      "total_params": 17024,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.0.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 16768,
+      "total_params": 16768,
+      "in_channels": 131,
+      "out_channels": 128,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.0.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 256,
+      "total_params": 256,
+      "has_bias": true,
+      "num_features": 128,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.0.2",
+      "type": "ReLU",
+      "depth": 7,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.1",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 33280,
+      "total_params": 33280,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.1.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 32768,
+      "total_params": 32768,
+      "in_channels": 128,
+      "out_channels": 256,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.convs.1.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 512,
+      "total_params": 512,
+      "has_bias": true,
+      "num_features": 256,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.3.0.grouper",
+      "type": "QueryAndGroup",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 330496,
+      "total_params": 330496,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.4.0",
+      "type": "SetAbstraction",
+      "depth": 4,
+      "trainable_params": 330496,
+      "total_params": 330496,
+      "stride": 2,
+      "has_children": true,
+      "num_children": 4
+    },
+    {
+      "name": "encoder.encoder.4.0.skipconv",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 131584,
+      "total_params": 131584,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.4.0.skipconv.0",
+      "type": "Conv1d",
+      "depth": 6,
+      "trainable_params": 131584,
+      "total_params": 131584,
+      "in_channels": 256,
+      "out_channels": 512,
+      "kernel_size": [
+        1
+      ],
+      "stride": [
+        1
+      ],
+      "padding": [
+        0
+      ],
+      "groups": 1,
+      "has_bias": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.act",
+      "type": "ReLU",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.convs",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 198912,
+      "total_params": 198912,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.0",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 66816,
+      "total_params": 66816,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.0.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 66304,
+      "total_params": 66304,
+      "in_channels": 259,
+      "out_channels": 256,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.0.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 512,
+      "total_params": 512,
+      "has_bias": true,
+      "num_features": 256,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.0.2",
+      "type": "ReLU",
+      "depth": 7,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.1",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 132096,
+      "total_params": 132096,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.1.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 131072,
+      "total_params": 131072,
+      "in_channels": 256,
+      "out_channels": 512,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.convs.1.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 1024,
+      "total_params": 1024,
+      "has_bias": true,
+      "num_features": 512,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.4.0.grouper",
+      "type": "QueryAndGroup",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 527872,
+      "total_params": 527872,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "encoder.encoder.5.0",
+      "type": "SetAbstraction",
+      "depth": 4,
+      "trainable_params": 527872,
+      "total_params": 527872,
+      "stride": 1,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.5.0.convs",
+      "type": "Sequential",
+      "depth": 5,
+      "trainable_params": 527872,
+      "total_params": 527872,
+      "has_children": true,
+      "num_children": 2
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.0",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 264704,
+      "total_params": 264704,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.0.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 263680,
+      "total_params": 263680,
+      "in_channels": 515,
+      "out_channels": 512,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.0.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 1024,
+      "total_params": 1024,
+      "has_bias": true,
+      "num_features": 512,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.0.2",
+      "type": "ReLU",
+      "depth": 7,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.1",
+      "type": "Sequential",
+      "depth": 6,
+      "trainable_params": 263168,
+      "total_params": 263168,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.1.0",
+      "type": "Conv2d",
+      "depth": 7,
+      "trainable_params": 262144,
+      "total_params": 262144,
+      "in_channels": 512,
+      "out_channels": 512,
+      "kernel_size": [
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.1.1",
+      "type": "BatchNorm2d",
+      "depth": 7,
+      "trainable_params": 1024,
+      "total_params": 1024,
+      "has_bias": true,
+      "num_features": 512,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5.0.convs.1.2",
+      "type": "ReLU",
+      "depth": 7,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "encoder.encoder.5.0.grouper",
+      "type": "GroupAll",
+      "depth": 5,
+      "trainable_params": 0,
+      "total_params": 0,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction",
+      "type": "ClsHead",
+      "depth": 1,
+      "trainable_params": 405032,
+      "total_params": 405032,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "prediction.head",
+      "type": "Sequential",
+      "depth": 2,
+      "trainable_params": 405032,
+      "total_params": 405032,
+      "has_children": true,
+      "num_children": 5
+    },
+    {
+      "name": "prediction.head.0",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 263168,
+      "total_params": 263168,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "prediction.head.0.0",
+      "type": "Linear",
+      "depth": 4,
+      "trainable_params": 262144,
+      "total_params": 262144,
+      "in_features": 512,
+      "out_features": 512,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.0.1",
+      "type": "BatchNorm1d",
+      "depth": 4,
+      "trainable_params": 1024,
+      "total_params": 1024,
+      "has_bias": true,
+      "num_features": 512,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.0.2",
+      "type": "ReLU",
+      "depth": 4,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.1",
+      "type": "Dropout",
+      "depth": 3,
+      "trainable_params": 0,
+      "total_params": 0,
+      "dropout_rate": 0.5,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.2",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 131584,
+      "total_params": 131584,
+      "has_children": true,
+      "num_children": 3
+    },
+    {
+      "name": "prediction.head.2.0",
+      "type": "Linear",
+      "depth": 4,
+      "trainable_params": 131072,
+      "total_params": 131072,
+      "in_features": 512,
+      "out_features": 256,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.2.1",
+      "type": "BatchNorm1d",
+      "depth": 4,
+      "trainable_params": 512,
+      "total_params": 512,
+      "has_bias": true,
+      "num_features": 256,
+      "eps": 1e-05,
+      "momentum": 0.1,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.2.2",
+      "type": "ReLU",
+      "depth": 4,
+      "trainable_params": 0,
+      "total_params": 0,
+      "inplace": true,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.3",
+      "type": "Dropout",
+      "depth": 3,
+      "trainable_params": 0,
+      "total_params": 0,
+      "dropout_rate": 0.5,
+      "has_children": false,
+      "num_children": 0
+    },
+    {
+      "name": "prediction.head.4",
+      "type": "Sequential",
+      "depth": 3,
+      "trainable_params": 10280,
+      "total_params": 10280,
+      "has_children": true,
+      "num_children": 1
+    },
+    {
+      "name": "prediction.head.4.0",
+      "type": "Linear",
+      "depth": 4,
+      "trainable_params": 10280,
+      "total_params": 10280,
+      "in_features": 256,
+      "out_features": 40,
+      "has_bias": true,
+      "has_children": false,
+      "num_children": 0
+    }
+  ],
+  "model_config": {
+    "NAME": "BaseCls",
+    "encoder_args": {
+      "NAME": "PointNextEncoder",
+      "blocks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "strides": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        1
+      ],
+      "width": 32,
+      "in_channels": 3,
+      "radius": 0.15,
+      "radius_scaling": 1.5,
+      "sa_layers": 2,
+      "sa_use_res": true,
+      "nsample": 32,
+      "expansion": 4,
+      "aggr_args": {
+        "feature_type": "dp_fj",
+        "reduction": "max"
+      },
+      "group_args": {
+        "NAME": "ballquery",
+        "normalize_dp": true
+      },
+      "conv_args": {
+        "order": "conv-norm-act"
+      },
+      "act_args": {
+        "act": "relu"
+      },
+      "norm_args": {
+        "norm": "bn"
+      }
+    },
+    "cls_args": {
+      "NAME": "ClsHead",
+      "num_classes": 40,
+      "mlps": [
+        512,
+        256
+      ],
+      "norm_args": {
+        "norm": "bn1d"
+      }
+    }
+  }
+}
