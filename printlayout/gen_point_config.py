@@ -26,8 +26,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import torch
 import torch.nn as nn
 
-# Ensure PointNeXt repo is importable
-ROOT = Path(__file__).resolve().parents[3] / 'PointNeXt'
+# Ensure PointNeXt repo is importable (repo root is two levels up from this file)
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
   sys.path.insert(0, str(ROOT))
 
@@ -151,6 +151,17 @@ def _collect_stages(model: nn.Module, sample_input: Dict[str, torch.Tensor]) -> 
         hooks.append(m.register_forward_hook(grouper_hook))
       if isinstance(m, nn.Conv2d):
         hooks.append(m.register_forward_hook(conv2d_hook(name)))
+      # Detect residual blocks (modules exposing a 'use_res' attribute)
+      if hasattr(m, 'use_res'):
+        def _res_hook(_m: nn.Module, _in: tuple, _out: Any):
+          nonlocal active_stage_idx
+          try:
+            flag = bool(getattr(_m, 'use_res'))
+            if flag and active_stage_idx >= 0 and active_stage_idx < len(stages):
+              stages[active_stage_idx].residual = True
+          except Exception:
+            pass
+        hooks.append(m.register_forward_hook(_res_hook))
 
   register_hooks()
   with torch.no_grad():
@@ -335,6 +346,19 @@ def generate_from_model(cfg_path: str, num_points: int, th: int = 64, device: st
   Cin_prev = enc.get('in_channels', model_cfg.get('in_channels', 3))
   feature_type = enc.get('aggr_args', {}).get('feature_type', 'dp_fj')
 
+  # Emit stem MLP (per-point 1x1 conv) if the first encoder stage is a head (stride==1)
+  # In PointNeXt, this is implemented as SetAbstraction with is_head=True, which applies a Conv1d: in_channels -> width
+  strides = enc.get('strides', []) or []
+  width = int(enc.get('width', Cin_prev))
+  emit_stem = len(strides) > 0 and int(strides[0]) == 1 and width is not None and int(Cin_prev) != int(width)
+  if emit_stem:
+    # Represent Conv1d as Conv2D with width=1 (kernel=1), over the full input point set (points[0])
+    lines.append(
+      f"        ('conv2d0-1', [points[0], 1, {int(Cin_prev)}, {width}, 1, 0, 1, batch_size]),"
+    )
+    # In official impl the head uses no norm and omits the last activation when layers==1; keep it minimal here.
+    Cin_prev = width
+
   for i, st in enumerate(stages):
     S = int(st.points_out)
     K = int(st.group_width)
@@ -361,6 +385,8 @@ def generate_from_model(cfg_path: str, num_points: int, th: int = 64, device: st
         f"        ('grouper{i+1}', [{N_in}, {N_out}, batch_size, {group_w}, {radius if radius is not None else 'None'}]),"
       )
     # Conv2d stack
+    # Track stage input channels for skip path (pre-dp augmentation)
+    Cin_stage_in = Cin_prev
     Cin_group = (Cin_prev + 3) if 'dp' in str(feature_type) else Cin_prev
     prev_C = Cin_group
     for li, Cout in enumerate(st.conv_channels, start=1):
@@ -371,22 +397,96 @@ def generate_from_model(cfg_path: str, num_points: int, th: int = 64, device: st
       lines.append(f"        ('relu{i+1}-{li}', []),")
       prev_C = Cout
     Cin_prev = prev_C
+    # SA pooling (reduce K->1)
     lines.append(
       f"        ('maxpool{i+1}', [{N_out}, {group_w}, {Cin_prev}, 1, 0, 1, batch_size]),"
     )
+    # Residual add (post-pool) if present in this stage
+    if getattr(st, 'residual', False):
+      # 1x1 projection on skip path uses original stage input channels (no dp augmentation), width=1 after gather
+      if Cin_stage_in != Cin_prev:
+        lines.append(
+          f"        ('skip{i+1}', [{N_out}, 1, {Cin_stage_in}, {Cin_prev}, 1, 0, 1, batch_size]),"
+        )
+      # Elementwise add across (N_out x 1 x channels)
+      lines.append(
+        f"        ('add{i+1}', [{N_out}, 1, {Cin_prev}]),"
+      )
 
-  # Head from cfg (more reliable than trying to infer via mixed modules)
-  cls_args = model_cfg.get('cls_args', cfg.get('cls_args', {}))
-  head_mlps = cls_args.get('mlps', [512, 256])
-  num_classes = int(cls_args.get('num_classes', 40))
-  in_dim = Cin_prev
-  for idx, out_dim in enumerate(head_mlps, start=1):
-    lines.append(f"        ('linear{idx}-1', [{in_dim}, {out_dim}, 1, batch_size]),")
-    lines.append(f"        ('bn{idx+5}-1', []),")
-    lines.append(f"        ('relu{idx+5}-1', []),")
-    lines.append(f"        ('dropout{idx}', []),")
-    in_dim = out_dim
-  lines.append(f"        ('linear{len(head_mlps)+1}-1', [{in_dim}, {num_classes}, 1, batch_size]),")
+  # Decoder + Head emission
+  model_name = str(model_cfg.get('NAME', '')).lower()
+  if 'seg' in model_name:  # segmentation model: emit FeaturePropagation (three interpolation) and conv1d head
+    # Derive encoder channel pyramid from the built model
+    enc_channels = []
+    try:
+      enc_channels = list(getattr(model.encoder, 'channel_list'))
+    except Exception:
+      # Fallback: approximate from observed Cin_prev doubling per stride
+      enc_channels = []
+    if enc_channels and len(points) == len(enc_channels):
+      # Emit 4 FP stages (from coarse to fine): points[s] -> points[s-1]
+      # Use ThreeNN op then map Conv1d as Conv2D with width=1
+      try:
+        decoder_layers = int(getattr(model.decoder, 'decoder_layers', 2))
+      except Exception:
+        decoder_layers = 2
+      # Start from coarsest
+      for s in range(len(enc_channels) - 1, 0, -1):
+        known = f'points[{s}]'      # coarse
+        unknown = f'points[{s-1}]'  # fine
+        chan_coarse = enc_channels[s]
+        fp_chan = enc_channels[s-1]
+        skip_chan = enc_channels[s-1]
+        # Interpolation
+        lines.append(
+          f"        ('threenn{len(enc_channels)-s}', [{known}, {unknown}, batch_size, 1.0, None, [False, False, False, False], {th}, {chan_coarse}]),"
+        )
+        # FP convs: first takes concatenated [skip, interp], then repeated to fp_chan
+        inC = skip_chan + chan_coarse
+        lines.append(
+          f"        ('conv2d_fp{len(enc_channels)-s}-1', [{unknown}, 1, {inC}, {fp_chan}, 1, 0, 1, batch_size]),"
+        )
+        lines.append(f"        ('bn_fp{len(enc_channels)-s}-1', []),")
+        lines.append(f"        ('relu_fp{len(enc_channels)-s}-1', []),")
+        for li in range(2, decoder_layers + 1):
+          lines.append(
+            f"        ('conv2d_fp{len(enc_channels)-s}-{li}', [{unknown}, 1, {fp_chan}, {fp_chan}, 1, 0, 1, batch_size]),"
+          )
+          lines.append(f"        ('bn_fp{len(enc_channels)-s}-{li}', []),")
+          lines.append(f"        ('relu_fp{len(enc_channels)-s}-{li}', []),")
+      # Seg head: simple 1x1 convs on N0 points
+      cls_args = model_cfg.get('cls_args', cfg.get('cls_args', {}))
+      num_classes = int(cls_args.get('num_classes', 13))
+      head_in = enc_channels[0] if enc_channels else Cin_prev
+      lines.append(
+        f"        ('conv2d_head1', [points[0], 1, {head_in}, {head_in}, 1, 0, 1, batch_size]),"
+      )
+      lines.append("        ('bn_head1', []),")
+      lines.append("        ('relu_head1', []),")
+      lines.append("        ('dropout_head', []),")
+      lines.append(
+        f"        ('conv2d_head2', [points[0], 1, {head_in}, {num_classes}, 1, 0, 1, batch_size]),"
+      )
+    else:
+      # If we can't resolve encoder channels, skip decoder emission and fall back to a minimal head
+      cls_args = model_cfg.get('cls_args', cfg.get('cls_args', {}))
+      num_classes = int(cls_args.get('num_classes', 13))
+      lines.append(
+        f"        ('conv2d_head', [points[0], 1, {Cin_prev}, {num_classes}, 1, 0, 1, batch_size]),"
+      )
+  else:
+    # Classification head (FC layers)
+    cls_args = model_cfg.get('cls_args', cfg.get('cls_args', {}))
+    head_mlps = cls_args.get('mlps', [512, 256])
+    num_classes = int(cls_args.get('num_classes', 40))
+    in_dim = Cin_prev
+    for idx, out_dim in enumerate(head_mlps, start=1):
+      lines.append(f"        ('linear{idx}-1', [{in_dim}, {out_dim}, 1, batch_size]),")
+      lines.append(f"        ('bn{idx+5}-1', []),")
+      lines.append(f"        ('relu{idx+5}-1', []),")
+      lines.append(f"        ('dropout{idx}', []),")
+      in_dim = out_dim
+    lines.append(f"        ('linear{len(head_mlps)+1}-1', [{in_dim}, {num_classes}, 1, batch_size]),")
 
   lines.append('    ])')
   lines.append('    return cfg')

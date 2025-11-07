@@ -1,0 +1,19 @@
+idx_group_0.csv	shape=(512, 32)	dtype=int32
+idx_group_1.csv	shape=(256, 32)	dtype=int32
+idx_group_2.csv	shape=(128, 32)	dtype=int32
+idx_group_3.csv	shape=(64, 32)	dtype=int32
+idx_group_4.csv	shape=(64, 64)	dtype=int64
+idx_sample_0.csv	shape=(512,)	dtype=int32
+idx_sample_1.csv	shape=(256,)	dtype=int32
+idx_sample_2.csv	shape=(128,)	dtype=int32
+idx_sample_3.csv	shape=(64,)	dtype=int32
+query_xyz_0.csv	shape=(512, 3)	dtype=float32
+query_xyz_1.csv	shape=(256, 3)	dtype=float32
+query_xyz_2.csv	shape=(128, 3)	dtype=float32
+query_xyz_3.csv	shape=(64, 3)	dtype=float32
+query_xyz_4.csv	shape=(64, 3)	dtype=float32
+support_xyz_0.csv	shape=(1024, 3)	dtype=float32
+support_xyz_1.csv	shape=(512, 3)	dtype=float32
+support_xyz_2.csv	shape=(256, 3)	dtype=float32
+support_xyz_3.csv	shape=(128, 3)	dtype=float32
+support_xyz_4.csv	shape=(64, 3)	dtype=float32

@@ -72,10 +72,20 @@ def _yes_no(flag: bool) -> str:
 
 
 def _module_requires_report(name: str, module: nn.Module) -> bool:
+    """Decide whether to print a row for this module.
+
+    Rules:
+    - Always print leaf modules (no children)
+    - Always print key composite blocks we care about: SetAbstraction/LocalAggregation
+    - Otherwise, print if class name hints (contains 'res' or 'incep')
+    """
     has_children = any(True for _ in module.children())
     if not has_children:
         return True
-    lowered = module.__class__.__name__.lower()
+    clsname = module.__class__.__name__
+    lowered = clsname.lower()
+    if clsname in {"SetAbstraction", "LocalAggregation"}:
+        return True
     if "res" in lowered or "incep" in lowered:
         return True
     return False
@@ -95,6 +105,9 @@ def _collect_model_details(model: nn.Module, sample_input: Any, max_width: int =
             output_shape = _extract_shape(output)
             params = sum(p.numel() for p in _module.parameters(recurse=False))
             lowered = _module.__class__.__name__.lower()
+            # Residual detection: prefer module attribute 'use_res' (PointNeXt SetAbstraction),
+            # otherwise fallback to class name heuristic containing 'res'.
+            res_flag = bool(getattr(_module, 'use_res', False) or ('res' in lowered))
             records.append({
                 "name": record_name,
                 "type": _module.__class__.__name__,
@@ -102,7 +115,7 @@ def _collect_model_details(model: nn.Module, sample_input: Any, max_width: int =
                 "output": shorten(pformat(output_shape, compact=True), width=max_width, placeholder="…"),
                 "kernel": _kernel_size_str(_module),
                 "params": params,
-                "residual": _yes_no("res" in lowered),
+                "residual": _yes_no(res_flag),
                 "inception": _yes_no("incep" in lowered)
             })
 

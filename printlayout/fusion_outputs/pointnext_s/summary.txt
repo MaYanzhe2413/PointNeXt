@@ -1,0 +1,10 @@
+num_stages: 5
+group_stages: 5
+start_stage: 4
+project_to: 1
+agg_sizes_mean: 64.0
+agg_sizes_std: 0.0
+overlap_mean: 1.0
+overlap_std: 0.0
+S_deep: 64
+K_chain: [32, 32, 32, 32, 64]
