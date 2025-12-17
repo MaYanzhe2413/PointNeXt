@@ -1,0 +1,25 @@
+# Original PCT Classification on ModelNet40 (FPS sampling)
+
+model:
+  NAME: BaseCls
+  encoder_args:
+    NAME: Pct
+    in_channels: 3
+    output_channels: 40
+    subsample: fps           # original uses FPS
+    sampler_args: {}
+  cls_args: null              # Pct internally outputs logits
+
+# Training hyperparameters
+epochs: 250                   # can raise to 300 for full convergence
+batch_size: 32
+lr: 0.001
+optimizer:
+  NAME: 'adamw'               # switch to adam if you want exact original
+  weight_decay: 0.05
+
+# To run directly:
+#   conda activate pointnext
+#   CUDA_VISIBLE_DEVICES=0 python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pct.yaml
+# Or via helper script (now supports pct):
+#   printf 'y\n' | PYTHON_BIN=/opt/conda/envs/pointnext/bin/python bash run_training.sh classification pct modelnet40 0

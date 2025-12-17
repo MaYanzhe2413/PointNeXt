@@ -1,0 +1,37 @@
+# PointTransformer Seg/Cls (adapted) with KDTree Simple Sampling on ModelNet40
+# Uses modified TransitionDown supporting sampler: kdtree_simple
+
+model:
+  NAME: BaseCls
+  encoder_args:
+    NAME: PTSeg                  # Reuse PTSeg backbone (will output per-point features; classification pools later)
+    block: PointTransformerBlock
+    blocks: [1,1,1,1,1]          # depth per stage
+    width: 32
+    nsample: [8,16,16,16,16]
+    in_channels: 3
+    num_classes: 40              # classification target
+    dec_local_aggr: False        # disable decoder local aggr for simpler cls
+    mid_res: False
+    sampler: kdtree_simple
+    sampler_args:
+      leaf_size: 32
+      strategy: random
+      proportional: True
+  cls_args:
+    NAME: ClsHead
+    num_classes: 40
+    mlps: [512,256]
+    norm_args:
+      norm: bn1d
+
+epochs: 250
+batch_size: 32
+lr: 0.001
+optimizer:
+  NAME: 'adamw'
+  weight_decay: 0.05
+
+# NOTE: For pure classification you may choose a lighter backbone; pooling occurs inside cls head.
+# Run:
+# python run_training.py --config cfgs/modelnet40ply2048/pointtransformer_kdtree_simple.yaml

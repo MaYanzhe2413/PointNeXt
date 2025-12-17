@@ -1,0 +1,25 @@
+# PCT Classification with KDTree Simple Sampling on ModelNet40
+
+model:
+  NAME: BaseCls
+  encoder_args:
+    NAME: Pct
+    in_channels: 3
+    output_channels: 40
+    subsample: kdtree_simple            # 使用 KDTree 叶节点简单采样替换 FPS
+    sampler_args:
+      leaf_size: 32                     # 叶节点最大大小 (可调: 16/32/64)
+      strategy: random                  # random | uniform
+      proportional: True                # 按叶节点点数占比分配采样数
+  cls_args: null                        # Pct 已内部输出 logits
+
+epochs: 250
+batch_size: 32
+lr: 0.001
+optimizer:
+  NAME: 'adamw'
+  weight_decay: 0.05
+
+# 数据集默认配置复用 default.yaml (ModelNet40Ply2048)
+# 运行示例:
+# python run_training.py --config cfgs/modelnet40ply2048/pct_kdtree_simple.yaml
