@@ -1,0 +1,53 @@
+# PointNeXt-S with Simple KDTree Sampling for S3DIS Semantic Segmentation
+# KDTree without FPS in leaves - faster and simpler spatial sampling strategy
+# Leaf nodes use random/uniform sampling for efficiency
+# Performance: Faster than kdtree variant with maintained spatial quality
+
+model:
+  NAME: BaseSeg
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1]
+    strides: [1, 4, 4, 4, 4]
+    sa_layers: 2 
+    sa_use_res: True 
+    width: 32
+    in_channels: 4
+    expansion: 4
+    radius: 0.1
+    nsample: 32
+    sampler: kdtree_simple  # KDTree sampling without FPS in leaves
+    sampler_args:
+      leaf_size: 32          # Maximum points per leaf node
+      strategy: random       # random | uniform sampling in leaves
+      proportional: true     # Allocate quota proportional to leaf sizes
+    aggr_args:
+      feature_type: 'dp_fj'
+      reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  decoder_args:
+    NAME: PointNextDecoder
+  cls_args:
+    NAME: SegHead
+    num_classes: 13
+    in_channels: null
+    norm_args:
+      norm: 'bn'
+
+datatransforms:
+  train: [ChromaticAutoContrast, PointsToTensor, PointCloudScaling, PointCloudXYZAlign, PointCloudJitter, ChromaticDropGPU, ChromaticNormalize]
+  val: [PointsToTensor, PointCloudXYZAlign, ChromaticNormalize]
+  vote: [ChromaticDropGPU]
+  kwargs:
+    color_drop: 0.2
+    gravity_dim: 2
+    scale: [0.9, 1.1]
+    jitter_sigma: 0.005
