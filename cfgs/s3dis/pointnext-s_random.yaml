@@ -1,7 +1,7 @@
-# PointNeXt-S with Simple KDTree Sampling for S3DIS Semantic Segmentation
-# KDTree without FPS in leaves - faster and simpler spatial sampling strategy
-# Leaf nodes use random/uniform sampling for efficiency
-# Performance: Faster than kdtree variant with maintained spatial quality
+# Model Information
+# GFLOPs  GMACs   Params.(M)
+#  3.64    1.79    0.792
+# Throughput (ins./s): 226.73038739659074 
 
 model:
   NAME: BaseSeg
@@ -16,11 +16,7 @@ model:
     expansion: 4
     radius: 0.1
     nsample: 32
-    sampler: kdtree  # KDTree sampling without FPS in leaves
-    sampler_args:
-      leaf_size: 256          # Maximum points per leaf node
-      strategy: fps       # random | uniform sampling in leaves
-      proportional: true     # Allocate quota proportional to leaf sizes
+    sampler: random
     aggr_args:
       feature_type: 'dp_fj'
       reduction: 'max'
@@ -42,6 +38,8 @@ model:
     norm_args:
       norm: 'bn'
 
+
+# do not conduct rotation in small model.
 datatransforms:
   train: [ChromaticAutoContrast, PointsToTensor, PointCloudScaling, PointCloudXYZAlign, PointCloudJitter, ChromaticDropGPU, ChromaticNormalize]
   val: [PointsToTensor, PointCloudXYZAlign, ChromaticNormalize]
@@ -51,3 +49,4 @@ datatransforms:
     gravity_dim: 2
     scale: [0.9, 1.1]
     jitter_sigma: 0.005
+    jitter_clip: 0.02

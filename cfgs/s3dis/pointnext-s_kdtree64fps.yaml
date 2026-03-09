@@ -18,7 +18,7 @@ model:
     nsample: 32
     sampler: kdtree  # KDTree sampling without FPS in leaves
     sampler_args:
-      leaf_size: 256          # Maximum points per leaf node
+      leaf_size: 64          # Maximum points per leaf node
       strategy: fps       # random | uniform sampling in leaves
       proportional: true     # Allocate quota proportional to leaf sizes
     aggr_args:
