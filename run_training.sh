@@ -22,6 +22,7 @@ show_help() {
     echo "  -l SIZE     leaf_size (默认32)"
     echo "  -e EPOCHS   训练轮数"
     echo "  -b SIZE     批次大小"
+    echo "  -S SEED     随机种子"
     echo "  --wandb     启用wandb"
     echo "  --test      测试模式"
     echo ""
@@ -44,6 +45,7 @@ STRATEGY=""
 LEAF_SIZE=""
 EPOCHS=""
 BATCH_SIZE=""
+SEED=""
 WANDB=""
 TEST_MODE=""
 
@@ -54,6 +56,7 @@ while [ $# -gt 0 ]; do
         -l) LEAF_SIZE="$2"; shift 2 ;;
         -e) EPOCHS="$2"; shift 2 ;;
         -b) BATCH_SIZE="$2"; shift 2 ;;
+        -S) SEED="$2"; shift 2 ;;
         --wandb) WANDB="true"; shift ;;
         --test) TEST_MODE="true"; shift ;;
         *) echo -e "${RED}未知选项: $1${NC}"; exit 1 ;;
@@ -97,6 +100,7 @@ ARGS=""
 [ -n "$LEAF_SIZE" ] && ARGS="$ARGS model.encoder_args.sampler_args.leaf_size=$LEAF_SIZE"
 [ -n "$EPOCHS" ] && ARGS="$ARGS epochs=$EPOCHS"
 [ -n "$BATCH_SIZE" ] && ARGS="$ARGS batch_size=$BATCH_SIZE"
+[ -n "$SEED" ] && ARGS="$ARGS seed=$SEED"
 [ "$WANDB" == "true" ] && ARGS="$ARGS wandb.use_wandb=True"
 [ "$TEST_MODE" == "true" ] && ARGS="$ARGS mode=test"
 
@@ -109,6 +113,7 @@ echo -e "${GREEN}数据集:${NC} $DATASET"
 echo -e "${GREEN}GPU:${NC} $GPU_IDS"
 [ -n "$STRATEGY" ] && echo -e "${GREEN}策略:${NC} $STRATEGY"
 [ -n "$LEAF_SIZE" ] && echo -e "${GREEN}leaf_size:${NC} $LEAF_SIZE"
+[ -n "$SEED" ] && echo -e "${GREEN}seed:${NC} $SEED"
 echo -e "${YELLOW}命令:${NC} $COMMAND"
 echo -e "${BLUE}================================${NC}"
 echo ""
