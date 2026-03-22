@@ -1,0 +1,635 @@
+[03/17 22:44:45] S3DIS INFO: dist_url: tcp://localhost:47482
+dist_backend: nccl
+multiprocessing_distributed: False
+ngpus_per_node: 1
+world_size: 3
+launcher: mp
+local_rank: 0
+use_gpu: True
+seed: 7895
+epoch: 0
+epochs: 100
+ignore_index: None
+val_fn: validate
+deterministic: False
+sync_bn: True
+criterion_args:
+  NAME: CrossEntropy
+  label_smoothing: 0.2
+use_mask: False
+grad_norm_clip: 10
+layer_decay: 0
+step_per_update: 1
+start_epoch: 1
+sched_on_epoch: True
+wandb:
+  use_wandb: False
+  project: PointNeXt-S3DIS
+  tags: ['s3dis', 'train', 'pointnext-s_kdtree12000fps', 'ngpus3']
+  name: s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+use_amp: False
+use_voting: False
+val_freq: 1
+resume: False
+test: False
+finetune: False
+mode: train
+logname: None
+load_path: None
+print_freq: 50
+save_freq: -1
+root_dir: log/s3dis
+pretrained_path: None
+datatransforms:
+  train: ['ChromaticAutoContrast', 'PointsToTensor', 'PointCloudScaling', 'PointCloudXYZAlign', 'PointCloudJitter', 'ChromaticDropGPU', 'ChromaticNormalize']
+  val: ['PointsToTensor', 'PointCloudXYZAlign', 'ChromaticNormalize']
+  vote: ['ChromaticDropGPU']
+  kwargs:
+    color_drop: 0.2
+    gravity_dim: 2
+    scale: [0.9, 1.1]
+    angle: [0, 0, 1]
+    jitter_sigma: 0.005
+    jitter_clip: 0.02
+feature_keys: x,heights
+dataset:
+  common:
+    NAME: S3DIS
+    data_root: /workspace/dataset/s3disfull
+    test_area: 5
+    voxel_size: 0.04
+  train:
+    split: train
+    voxel_max: 24000
+    loop: 30
+    presample: False
+  val:
+    split: val
+    voxel_max: None
+    presample: True
+  test:
+    split: test
+    voxel_max: None
+    presample: False
+num_classes: 13
+batch_size: 32
+val_batch_size: 1
+dataloader:
+  num_workers: 6
+cls_weighed_loss: False
+optimizer:
+  NAME: adamw
+  weight_decay: 0.0001
+sched: cosine
+warmup_epochs: 0
+min_lr: 1e-05
+lr: 0.01
+log_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+model:
+  NAME: BaseSeg
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1]
+    strides: [1, 4, 4, 4, 4]
+    sa_layers: 2
+    sa_use_res: True
+    width: 32
+    in_channels: 4
+    expansion: 4
+    radius: 0.1
+    nsample: 32
+    sampler: kdtree
+    sampler_args:
+      leaf_size: 12000
+      strategy: fps
+      proportional: True
+    aggr_args:
+      feature_type: dp_fj
+      reduction: max
+    group_args:
+      NAME: ballquery
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: relu
+    norm_args:
+      norm: bn
+  decoder_args:
+    NAME: PointNextDecoder
+  cls_args:
+    NAME: SegHead
+    num_classes: 13
+    in_channels: None
+    norm_args:
+      norm: bn
+rank: 1
+distributed: True
+mp: True
+task_name: s3dis
+cfg_basename: pointnext-s_kdtree12000fps
+opts: seed=7895
+is_training: True
+run_name: s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+run_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+exp_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+ckpt_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z/checkpoint
+log_path: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z.log
+cfg_path: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z/cfg.yaml
+[03/17 22:44:45] S3DIS INFO: radius: [[0.1], [0.1], [0.2], [0.4], [0.8]],
+ nsample: [[32], [32], [32], [32], [32]]
+[03/17 22:44:45] S3DIS INFO: NAME: ballquery
+normalize_dp: True
+radius: 0.1
+nsample: 32
+[03/17 22:44:45] S3DIS INFO: NAME: ballquery
+normalize_dp: True
+radius: 0.2
+nsample: 32
+[03/17 22:44:45] S3DIS INFO: NAME: ballquery
+normalize_dp: True
+radius: 0.4
+nsample: 32
+[03/17 22:44:45] S3DIS INFO: NAME: ballquery
+normalize_dp: True
+radius: 0.8
+nsample: 32
+[03/17 22:44:45] S3DIS INFO: BaseSeg(
+  (encoder): PointNextEncoder(
+    (encoder): Sequential(
+      (0): Sequential(
+        (0): SetAbstraction(
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv1d(4, 32, kernel_size=(1,), stride=(1,))
+            )
+          )
+        )
+      )
+      (1): Sequential(
+        (0): SetAbstraction(
+          (skipconv): Sequential(
+            (0): Conv1d(32, 64, kernel_size=(1,), stride=(1,))
+          )
+          (act): ReLU(inplace=True)
+          (quant_skip): QuantStub()
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv2d(35, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv2d(32, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (grouper): QueryAndGroup()
+          (pool): MaxPool()
+          (qadd): QAdd(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_feat): DeQuantStub()
+          (quant_feat): QuantStub()
+        )
+      )
+      (2): Sequential(
+        (0): SetAbstraction(
+          (skipconv): Sequential(
+            (0): Conv1d(64, 128, kernel_size=(1,), stride=(1,))
+          )
+          (act): ReLU(inplace=True)
+          (quant_skip): QuantStub()
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv2d(67, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (grouper): QueryAndGroup()
+          (pool): MaxPool()
+          (qadd): QAdd(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_feat): DeQuantStub()
+          (quant_feat): QuantStub()
+        )
+      )
+      (3): Sequential(
+        (0): SetAbstraction(
+          (skipconv): Sequential(
+            (0): Conv1d(128, 256, kernel_size=(1,), stride=(1,))
+          )
+          (act): ReLU(inplace=True)
+          (quant_skip): QuantStub()
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv2d(131, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (grouper): QueryAndGroup()
+          (pool): MaxPool()
+          (qadd): QAdd(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_feat): DeQuantStub()
+          (quant_feat): QuantStub()
+        )
+      )
+      (4): Sequential(
+        (0): SetAbstraction(
+          (skipconv): Sequential(
+            (0): Conv1d(256, 512, kernel_size=(1,), stride=(1,))
+          )
+          (act): ReLU(inplace=True)
+          (quant_skip): QuantStub()
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv2d(259, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (grouper): QueryAndGroup()
+          (pool): MaxPool()
+          (qadd): QAdd(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_feat): DeQuantStub()
+          (quant_feat): QuantStub()
+        )
+      )
+    )
+    (quant_input): QuantStub()
+  )
+  (decoder): PointNextDecoder(
+    (decoder): Sequential(
+      (0): Sequential(
+        (0): FeaturePropogation(
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv1d(96, 32, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv1d(32, 32, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+          )
+          (pool): MeanPool()
+          (qcat): QCat(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_f2): DeQuantStub()
+          (quant_interp): QuantStub()
+        )
+      )
+      (1): Sequential(
+        (0): FeaturePropogation(
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv1d(192, 64, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv1d(64, 64, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+          )
+          (pool): MeanPool()
+          (qcat): QCat(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_f2): DeQuantStub()
+          (quant_interp): QuantStub()
+        )
+      )
+      (2): Sequential(
+        (0): FeaturePropogation(
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv1d(384, 128, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv1d(128, 128, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+          )
+          (pool): MeanPool()
+          (qcat): QCat(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_f2): DeQuantStub()
+          (quant_interp): QuantStub()
+        )
+      )
+      (3): Sequential(
+        (0): FeaturePropogation(
+          (convs): Sequential(
+            (0): Sequential(
+              (0): Conv1d(768, 256, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+            (1): Sequential(
+              (0): Conv1d(256, 256, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+              (2): ReLU(inplace=True)
+            )
+          )
+          (pool): MeanPool()
+          (qcat): QCat(
+            (ff): FloatFunctional(
+              (activation_post_process): Identity()
+            )
+          )
+          (dequant_f2): DeQuantStub()
+          (quant_interp): QuantStub()
+        )
+      )
+    )
+  )
+  (head): SegHead(
+    (head): Sequential(
+      (0): Sequential(
+        (0): Conv1d(32, 32, kernel_size=(1,), stride=(1,), bias=False)
+        (1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU(inplace=True)
+      )
+      (1): Dropout(p=0.5, inplace=False)
+      (2): Sequential(
+        (0): Conv1d(32, 13, kernel_size=(1,), stride=(1,))
+      )
+    )
+  )
+  (dequant_output): DeQuantStub()
+)
+[03/17 22:44:45] S3DIS INFO: Number of params: 0.7922 M
+[03/17 22:44:45] S3DIS INFO: Using Synchronized BatchNorm ...
+[03/17 22:44:45] S3DIS INFO: Using Distributed Data parallel ...
+[03/17 22:44:45] S3DIS INFO: Param groups = {
+  "decay": {
+    "weight_decay": 0.0001,
+    "params": [
+      "module.encoder.encoder.0.0.convs.0.0.weight",
+      "module.encoder.encoder.1.0.skipconv.0.weight",
+      "module.encoder.encoder.1.0.convs.0.0.weight",
+      "module.encoder.encoder.1.0.convs.1.0.weight",
+      "module.encoder.encoder.2.0.skipconv.0.weight",
+      "module.encoder.encoder.2.0.convs.0.0.weight",
+      "module.encoder.encoder.2.0.convs.1.0.weight",
+      "module.encoder.encoder.3.0.skipconv.0.weight",
+      "module.encoder.encoder.3.0.convs.0.0.weight",
+      "module.encoder.encoder.3.0.convs.1.0.weight",
+      "module.encoder.encoder.4.0.skipconv.0.weight",
+      "module.encoder.encoder.4.0.convs.0.0.weight",
+      "module.encoder.encoder.4.0.convs.1.0.weight",
+      "module.decoder.decoder.0.0.convs.0.0.weight",
+      "module.decoder.decoder.0.0.convs.1.0.weight",
+      "module.decoder.decoder.1.0.convs.0.0.weight",
+      "module.decoder.decoder.1.0.convs.1.0.weight",
+      "module.decoder.decoder.2.0.convs.0.0.weight",
+      "module.decoder.decoder.2.0.convs.1.0.weight",
+      "module.decoder.decoder.3.0.convs.0.0.weight",
+      "module.decoder.decoder.3.0.convs.1.0.weight",
+      "module.head.head.0.0.weight",
+      "module.head.head.2.0.weight"
+    ],
+    "lr_scale": 1.0
+  },
+  "no_decay": {
+    "weight_decay": 0.0,
+    "params": [
+      "module.encoder.encoder.0.0.convs.0.0.bias",
+      "module.encoder.encoder.1.0.skipconv.0.bias",
+      "module.encoder.encoder.1.0.convs.0.1.weight",
+      "module.encoder.encoder.1.0.convs.0.1.bias",
+      "module.encoder.encoder.1.0.convs.1.1.weight",
+      "module.encoder.encoder.1.0.convs.1.1.bias",
+      "module.encoder.encoder.2.0.skipconv.0.bias",
+      "module.encoder.encoder.2.0.convs.0.1.weight",
+      "module.encoder.encoder.2.0.convs.0.1.bias",
+      "module.encoder.encoder.2.0.convs.1.1.weight",
+      "module.encoder.encoder.2.0.convs.1.1.bias",
+      "module.encoder.encoder.3.0.skipconv.0.bias",
+      "module.encoder.encoder.3.0.convs.0.1.weight",
+      "module.encoder.encoder.3.0.convs.0.1.bias",
+      "module.encoder.encoder.3.0.convs.1.1.weight",
+      "module.encoder.encoder.3.0.convs.1.1.bias",
+      "module.encoder.encoder.4.0.skipconv.0.bias",
+      "module.encoder.encoder.4.0.convs.0.1.weight",
+      "module.encoder.encoder.4.0.convs.0.1.bias",
+      "module.encoder.encoder.4.0.convs.1.1.weight",
+      "module.encoder.encoder.4.0.convs.1.1.bias",
+      "module.decoder.decoder.0.0.convs.0.1.weight",
+      "module.decoder.decoder.0.0.convs.0.1.bias",
+      "module.decoder.decoder.0.0.convs.1.1.weight",
+      "module.decoder.decoder.0.0.convs.1.1.bias",
+      "module.decoder.decoder.1.0.convs.0.1.weight",
+      "module.decoder.decoder.1.0.convs.0.1.bias",
+      "module.decoder.decoder.1.0.convs.1.1.weight",
+      "module.decoder.decoder.1.0.convs.1.1.bias",
+      "module.decoder.decoder.2.0.convs.0.1.weight",
+      "module.decoder.decoder.2.0.convs.0.1.bias",
+      "module.decoder.decoder.2.0.convs.1.1.weight",
+      "module.decoder.decoder.2.0.convs.1.1.bias",
+      "module.decoder.decoder.3.0.convs.0.1.weight",
+      "module.decoder.decoder.3.0.convs.0.1.bias",
+      "module.decoder.decoder.3.0.convs.1.1.weight",
+      "module.decoder.decoder.3.0.convs.1.1.bias",
+      "module.head.head.0.1.weight",
+      "module.head.head.0.1.bias",
+      "module.head.head.2.0.bias"
+    ],
+    "lr_scale": 1.0
+  }
+}
+[03/17 22:44:45] S3DIS INFO: 
+Totally 68 samples in val set
+[03/17 22:44:45] S3DIS INFO: length of validation dataset: 68
+[03/17 22:44:45] S3DIS INFO: number of classes of the dataset: 13
+[03/17 22:44:45] S3DIS INFO: Training from scratch
+[03/17 22:44:45] S3DIS INFO: 
+Totally 204 samples in train set
+[03/17 22:44:45] S3DIS INFO: length of training dataset: 6120
+[03/17 22:45:02] S3DIS INFO: [Sampler] kdtree_simple_sample | B=32, N=24000, npoint=6000, leaf_size=12000, strategy=fps, proportional=True | recursive median-split + leaf fps sampling
+[03/17 22:45:12] S3DIS INFO: Reducer buckets have been rebuilt in this iteration.
+[03/17 22:48:00] S3DIS INFO: Find a better ckpt @E1, val_miou 23.37 val_macc 29.04, val_oa 65.31
+mious: [80.58 91.12 56.46  0.    0.    0.    0.75 34.57 20.31  0.    4.11  0.
+ 15.85]
+[03/17 22:48:00] S3DIS INFO: Epoch 1 LR 0.010000 train_miou 21.66, val_miou 23.37, best val miou 23.37
+[03/17 22:50:58] S3DIS INFO: Find a better ckpt @E2, val_miou 34.61 val_macc 43.57, val_oa 75.54
+mious: [85.61 95.83 68.16  0.    0.    9.75  7.08 56.31 48.57  0.   46.4   0.
+ 32.18]
+[03/17 22:50:58] S3DIS INFO: Epoch 2 LR 0.009998 train_miou 34.46, val_miou 34.61, best val miou 34.61
+[03/17 22:54:00] S3DIS INFO: Find a better ckpt @E3, val_miou 40.37 val_macc 47.55, val_oa 78.66
+mious: [87.16 96.32 66.64  0.    0.   39.78  3.46 66.36 70.43  0.   55.64  0.
+ 39.03]
+[03/17 22:54:00] S3DIS INFO: Epoch 3 LR 0.009990 train_miou 43.31, val_miou 40.37, best val miou 40.37
+[03/17 22:56:59] S3DIS INFO: Epoch 4 LR 0.009978 train_miou 49.53, val_miou 40.09, best val miou 40.37
+[03/17 23:00:05] S3DIS INFO: Find a better ckpt @E5, val_miou 42.91 val_macc 51.55, val_oa 79.60
+mious: [86.28 96.75 70.32  0.    0.   42.84 21.   67.92 57.52  0.   55.13 26.26
+ 33.78]
+[03/17 23:00:05] S3DIS INFO: Epoch 5 LR 0.009961 train_miou 53.00, val_miou 42.91, best val miou 42.91
+[03/17 23:03:01] S3DIS INFO: Epoch 6 LR 0.009939 train_miou 57.25, val_miou 40.61, best val miou 42.91
+[03/17 23:06:02] S3DIS INFO: Find a better ckpt @E7, val_miou 48.07 val_macc 55.78, val_oa 82.26
+mious: [91.15 96.86 73.31  0.    0.   44.06 22.12 72.04 72.02  0.   57.17 50.29
+ 45.89]
+[03/17 23:06:02] S3DIS INFO: Epoch 7 LR 0.009912 train_miou 59.92, val_miou 48.07, best val miou 48.07
+[03/17 23:09:02] S3DIS INFO: Epoch 8 LR 0.009880 train_miou 60.56, val_miou 48.03, best val miou 48.07
+[03/17 23:12:05] S3DIS INFO: Find a better ckpt @E9, val_miou 49.85 val_macc 56.34, val_oa 83.07
+mious: [91.13 97.07 73.17  0.    3.37 38.91 28.87 70.   82.52  0.   62.18 53.07
+ 47.73]
+[03/17 23:12:05] S3DIS INFO: Epoch 9 LR 0.009843 train_miou 62.83, val_miou 49.85, best val miou 49.85
+[03/17 23:15:08] S3DIS INFO: Epoch 10 LR 0.009802 train_miou 65.55, val_miou 43.86, best val miou 49.85
+[03/17 23:18:12] S3DIS INFO: Find a better ckpt @E11, val_miou 52.92 val_macc 61.11, val_oa 84.13
+mious: [91.67 97.2  73.5   0.    6.13 43.54 31.72 70.98 79.34 27.68 69.33 48.49
+ 48.37]
+[03/17 23:18:12] S3DIS INFO: Epoch 11 LR 0.009756 train_miou 68.26, val_miou 52.92, best val miou 52.92
+[03/17 23:21:25] S3DIS INFO: Epoch 12 LR 0.009705 train_miou 71.47, val_miou 47.28, best val miou 52.92
+[03/17 23:24:25] S3DIS INFO: Epoch 13 LR 0.009649 train_miou 73.13, val_miou 52.30, best val miou 52.92
+[03/17 23:27:29] S3DIS INFO: Find a better ckpt @E14, val_miou 56.62 val_macc 63.69, val_oa 84.01
+mious: [92.41 96.97 72.7   0.   21.35 45.17 37.65 73.42 81.74 52.56 66.72 44.65
+ 50.74]
+[03/17 23:27:29] S3DIS INFO: Epoch 14 LR 0.009589 train_miou 75.55, val_miou 56.62, best val miou 56.62
+[03/17 23:30:27] S3DIS INFO: Epoch 15 LR 0.009525 train_miou 76.81, val_miou 52.50, best val miou 56.62
+[03/17 23:33:34] S3DIS INFO: Epoch 16 LR 0.009456 train_miou 77.81, val_miou 54.00, best val miou 56.62
+[03/17 23:36:29] S3DIS INFO: Epoch 17 LR 0.009382 train_miou 78.94, val_miou 52.87, best val miou 56.62
+[03/17 23:39:40] S3DIS INFO: Epoch 18 LR 0.009304 train_miou 79.60, val_miou 54.55, best val miou 56.62
+[03/17 23:42:50] S3DIS INFO: Epoch 19 LR 0.009222 train_miou 80.32, val_miou 51.53, best val miou 56.62
+[03/17 23:46:01] S3DIS INFO: Epoch 20 LR 0.009136 train_miou 80.43, val_miou 55.25, best val miou 56.62
+[03/17 23:48:58] S3DIS INFO: Epoch 21 LR 0.009046 train_miou 81.11, val_miou 53.03, best val miou 56.62
+[03/17 23:52:00] S3DIS INFO: Find a better ckpt @E22, val_miou 56.73 val_macc 64.23, val_oa 83.95
+mious: [91.48 97.   73.7   0.   20.05 29.72 44.93 72.16 81.76 61.41 68.09 49.27
+ 47.9 ]
+[03/17 23:52:00] S3DIS INFO: Epoch 22 LR 0.008952 train_miou 80.91, val_miou 56.73, best val miou 56.73
+[03/17 23:54:58] S3DIS INFO: Find a better ckpt @E23, val_miou 58.57 val_macc 67.58, val_oa 84.39
+mious: [90.54 97.22 74.61  0.   27.05 48.11 47.68 73.44 83.36 46.43 70.01 54.33
+ 48.61]
+[03/17 23:54:58] S3DIS INFO: Epoch 23 LR 0.008854 train_miou 82.13, val_miou 58.57, best val miou 58.57
+[03/17 23:57:55] S3DIS INFO: Epoch 24 LR 0.008752 train_miou 82.56, val_miou 54.57, best val miou 58.57
+[03/18 00:01:03] S3DIS INFO: Epoch 25 LR 0.008646 train_miou 82.73, val_miou 56.01, best val miou 58.57
+[03/18 00:04:12] S3DIS INFO: Epoch 26 LR 0.008537 train_miou 83.44, val_miou 56.22, best val miou 58.57
+[03/18 00:07:12] S3DIS INFO: Epoch 27 LR 0.008424 train_miou 83.12, val_miou 57.84, best val miou 58.57
+[03/18 00:10:13] S3DIS INFO: Epoch 28 LR 0.008308 train_miou 83.82, val_miou 57.86, best val miou 58.57
+[03/18 00:13:18] S3DIS INFO: Find a better ckpt @E29, val_miou 59.76 val_macc 67.57, val_oa 85.09
+mious: [92.46 97.25 74.53  0.   19.97 49.82 41.59 75.38 85.41 65.86 68.43 55.63
+ 50.57]
+[03/18 00:13:18] S3DIS INFO: Epoch 29 LR 0.008189 train_miou 83.97, val_miou 59.76, best val miou 59.76
+[03/18 00:16:19] S3DIS INFO: Epoch 30 LR 0.008066 train_miou 84.26, val_miou 55.63, best val miou 59.76
+[03/18 00:19:19] S3DIS INFO: Epoch 31 LR 0.007941 train_miou 84.23, val_miou 56.82, best val miou 59.76
+[03/18 00:22:27] S3DIS INFO: Epoch 32 LR 0.007813 train_miou 84.68, val_miou 56.04, best val miou 59.76
+[03/18 00:25:26] S3DIS INFO: Epoch 33 LR 0.007681 train_miou 84.10, val_miou 56.26, best val miou 59.76
+[03/18 00:28:29] S3DIS INFO: Epoch 34 LR 0.007548 train_miou 84.99, val_miou 56.39, best val miou 59.76
+[03/18 00:31:31] S3DIS INFO: Epoch 35 LR 0.007411 train_miou 84.60, val_miou 56.57, best val miou 59.76
+[03/18 00:34:35] S3DIS INFO: Epoch 36 LR 0.007273 train_miou 84.86, val_miou 59.76, best val miou 59.76
+[03/18 00:37:33] S3DIS INFO: Epoch 37 LR 0.007132 train_miou 85.74, val_miou 55.46, best val miou 59.76
+[03/18 00:40:28] S3DIS INFO: Epoch 38 LR 0.006989 train_miou 85.77, val_miou 57.82, best val miou 59.76
+[03/18 00:43:29] S3DIS INFO: Epoch 39 LR 0.006844 train_miou 85.74, val_miou 58.51, best val miou 59.76
+[03/18 00:46:31] S3DIS INFO: Epoch 40 LR 0.006697 train_miou 86.08, val_miou 57.07, best val miou 59.76
+[03/18 00:49:32] S3DIS INFO: Epoch 41 LR 0.006549 train_miou 86.16, val_miou 58.13, best val miou 59.76
+[03/18 00:52:47] S3DIS INFO: Epoch 42 LR 0.006399 train_miou 86.10, val_miou 58.34, best val miou 59.76
+[03/18 00:55:57] S3DIS INFO: Epoch 43 LR 0.006247 train_miou 86.18, val_miou 57.46, best val miou 59.76
+[03/18 00:58:56] S3DIS INFO: Epoch 44 LR 0.006095 train_miou 86.65, val_miou 58.83, best val miou 59.76
+[03/18 01:01:58] S3DIS INFO: Epoch 45 LR 0.005941 train_miou 86.61, val_miou 56.34, best val miou 59.76
+[03/18 01:05:07] S3DIS INFO: Find a better ckpt @E46, val_miou 59.97 val_macc 67.36, val_oa 86.10
+mious: [91.39 97.43 77.07  0.   27.85 49.02 51.45 76.47 84.56 52.5  70.71 52.69
+ 48.48]
+[03/18 01:05:07] S3DIS INFO: Epoch 46 LR 0.005786 train_miou 86.94, val_miou 59.97, best val miou 59.97
+[03/18 01:08:11] S3DIS INFO: Epoch 47 LR 0.005631 train_miou 87.18, val_miou 58.77, best val miou 59.97
+[03/18 01:11:19] S3DIS INFO: Epoch 48 LR 0.005475 train_miou 86.75, val_miou 57.37, best val miou 59.97
+[03/18 01:14:26] S3DIS INFO: Epoch 49 LR 0.005319 train_miou 86.94, val_miou 58.27, best val miou 59.97
+[03/18 01:17:31] S3DIS INFO: Epoch 50 LR 0.005162 train_miou 87.21, val_miou 56.66, best val miou 59.97
+[03/18 01:20:28] S3DIS INFO: Epoch 51 LR 0.005005 train_miou 87.42, val_miou 58.60, best val miou 59.97
+[03/18 01:23:29] S3DIS INFO: Epoch 52 LR 0.004848 train_miou 87.15, val_miou 56.66, best val miou 59.97
+[03/18 01:26:28] S3DIS INFO: Epoch 53 LR 0.004691 train_miou 87.66, val_miou 58.08, best val miou 59.97
+[03/18 01:29:39] S3DIS INFO: Epoch 54 LR 0.004535 train_miou 87.62, val_miou 58.09, best val miou 59.97
+[03/18 01:32:37] S3DIS INFO: Epoch 55 LR 0.004379 train_miou 87.78, val_miou 57.81, best val miou 59.97
+[03/18 01:35:38] S3DIS INFO: Epoch 56 LR 0.004224 train_miou 87.35, val_miou 58.86, best val miou 59.97
+[03/18 01:38:45] S3DIS INFO: Epoch 57 LR 0.004069 train_miou 87.72, val_miou 58.07, best val miou 59.97
+[03/18 01:41:49] S3DIS INFO: Epoch 58 LR 0.003915 train_miou 87.96, val_miou 59.13, best val miou 59.97
+[03/18 01:44:52] S3DIS INFO: Epoch 59 LR 0.003763 train_miou 87.80, val_miou 59.90, best val miou 59.97
+[03/18 01:47:58] S3DIS INFO: Epoch 60 LR 0.003611 train_miou 88.08, val_miou 58.57, best val miou 59.97
+[03/18 01:51:02] S3DIS INFO: Epoch 61 LR 0.003461 train_miou 87.96, val_miou 58.21, best val miou 59.97
+[03/18 01:54:17] S3DIS INFO: Epoch 62 LR 0.003313 train_miou 88.08, val_miou 58.63, best val miou 59.97
+[03/18 01:57:15] S3DIS INFO: Epoch 63 LR 0.003166 train_miou 88.38, val_miou 59.06, best val miou 59.97
+[03/18 02:00:22] S3DIS INFO: Epoch 64 LR 0.003021 train_miou 88.30, val_miou 58.41, best val miou 59.97
+[03/18 02:03:25] S3DIS INFO: Epoch 65 LR 0.002878 train_miou 88.24, val_miou 58.78, best val miou 59.97
+[03/18 02:06:29] S3DIS INFO: Find a better ckpt @E66, val_miou 60.70 val_macc 67.87, val_oa 86.32
+mious: [91.64 97.44 77.87  0.01 27.37 49.76 54.89 76.09 85.18 56.96 69.96 51.66
+ 50.23]
+[03/18 02:06:29] S3DIS INFO: Epoch 66 LR 0.002737 train_miou 88.33, val_miou 60.70, best val miou 60.70
+[03/18 02:09:30] S3DIS INFO: Epoch 67 LR 0.002599 train_miou 88.71, val_miou 58.70, best val miou 60.70
+[03/18 02:12:30] S3DIS INFO: Epoch 68 LR 0.002462 train_miou 88.47, val_miou 59.56, best val miou 60.70
+[03/18 02:15:37] S3DIS INFO: Epoch 69 LR 0.002329 train_miou 88.60, val_miou 60.28, best val miou 60.70
+[03/18 02:18:47] S3DIS INFO: Epoch 70 LR 0.002197 train_miou 88.63, val_miou 58.42, best val miou 60.70
+[03/18 02:21:54] S3DIS INFO: Epoch 71 LR 0.002069 train_miou 88.75, val_miou 59.25, best val miou 60.70
+[03/18 02:25:03] S3DIS INFO: Epoch 72 LR 0.001944 train_miou 88.75, val_miou 59.28, best val miou 60.70
+[03/18 02:28:12] S3DIS INFO: Epoch 73 LR 0.001821 train_miou 88.86, val_miou 59.51, best val miou 60.70
+[03/18 02:31:15] S3DIS INFO: Epoch 74 LR 0.001702 train_miou 88.79, val_miou 59.73, best val miou 60.70
+[03/18 02:34:26] S3DIS INFO: Epoch 75 LR 0.001586 train_miou 88.78, val_miou 59.03, best val miou 60.70
+[03/18 02:37:27] S3DIS INFO: Epoch 76 LR 0.001473 train_miou 89.00, val_miou 59.83, best val miou 60.70
+[03/18 02:40:21] S3DIS INFO: Epoch 77 LR 0.001364 train_miou 88.96, val_miou 60.18, best val miou 60.70
+[03/18 02:43:23] S3DIS INFO: Epoch 78 LR 0.001258 train_miou 88.92, val_miou 59.43, best val miou 60.70
+[03/18 02:46:26] S3DIS INFO: Epoch 79 LR 0.001156 train_miou 89.03, val_miou 59.50, best val miou 60.70
+[03/18 02:49:47] S3DIS INFO: Epoch 80 LR 0.001058 train_miou 89.16, val_miou 59.37, best val miou 60.70
+[03/18 02:52:55] S3DIS INFO: Epoch 81 LR 0.000964 train_miou 89.10, val_miou 59.58, best val miou 60.70
+[03/18 02:55:53] S3DIS INFO: Epoch 82 LR 0.000874 train_miou 89.17, val_miou 59.89, best val miou 60.70
+[03/18 02:58:51] S3DIS INFO: Epoch 83 LR 0.000788 train_miou 89.12, val_miou 59.30, best val miou 60.70
+[03/18 03:01:59] S3DIS INFO: Epoch 84 LR 0.000706 train_miou 89.14, val_miou 59.54, best val miou 60.70
+[03/18 03:05:02] S3DIS INFO: Epoch 85 LR 0.000628 train_miou 89.25, val_miou 59.17, best val miou 60.70
+[03/18 03:08:07] S3DIS INFO: Epoch 86 LR 0.000554 train_miou 89.32, val_miou 59.45, best val miou 60.70
+[03/18 03:11:06] S3DIS INFO: Epoch 87 LR 0.000485 train_miou 89.40, val_miou 60.27, best val miou 60.70
+[03/18 03:14:14] S3DIS INFO: Epoch 88 LR 0.000421 train_miou 89.36, val_miou 60.03, best val miou 60.70
+[03/18 03:17:20] S3DIS INFO: Epoch 89 LR 0.000361 train_miou 89.50, val_miou 59.76, best val miou 60.70
+[03/18 03:20:18] S3DIS INFO: Epoch 90 LR 0.000305 train_miou 89.34, val_miou 59.77, best val miou 60.70
+[03/18 03:23:15] S3DIS INFO: Epoch 91 LR 0.000254 train_miou 89.34, val_miou 59.99, best val miou 60.70
+[03/18 03:26:18] S3DIS INFO: Epoch 92 LR 0.000208 train_miou 89.47, val_miou 59.88, best val miou 60.70
+[03/18 03:29:36] S3DIS INFO: Epoch 93 LR 0.000167 train_miou 89.43, val_miou 60.03, best val miou 60.70
+[03/18 03:33:05] S3DIS INFO: Epoch 94 LR 0.000130 train_miou 89.46, val_miou 60.03, best val miou 60.70
+[03/18 03:36:10] S3DIS INFO: Epoch 95 LR 0.000098 train_miou 89.32, val_miou 59.74, best val miou 60.70
+[03/18 03:39:38] S3DIS INFO: Epoch 96 LR 0.000071 train_miou 89.56, val_miou 59.92, best val miou 60.70
+[03/18 03:43:11] S3DIS INFO: Epoch 97 LR 0.000049 train_miou 89.48, val_miou 59.77, best val miou 60.70
+[03/18 03:46:37] S3DIS INFO: Epoch 98 LR 0.000032 train_miou 89.53, val_miou 59.71, best val miou 60.70
+[03/18 03:49:45] S3DIS INFO: Epoch 99 LR 0.000020 train_miou 89.44, val_miou 59.75, best val miou 60.70
+[03/18 03:52:53] S3DIS INFO: Epoch 100 LR 0.000012 train_miou 89.38, val_miou 59.95, best val miou 60.70
+[03/18 03:52:53] S3DIS INFO: Best ckpt @E66,  val_oa 86.32, val_macc 67.87, val_miou 60.70, 
+iou per cls is: [91.64 97.44 77.87  0.01 27.37 49.76 54.89 76.09 85.18 56.96 69.96 51.66
+ 50.23]
+[03/18 03:52:53] S3DIS WARNING: Testing using multiple GPUs is not allowed for now. Running testing after this training is required.

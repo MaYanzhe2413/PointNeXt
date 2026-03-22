@@ -1,0 +1,190 @@
+!!python/object/new:openpoints.utils.config.EasyConfig
+dictitems:
+  batch_size: 32
+  cfg_basename: pointnext-s_kdtree12000fps
+  ckpt_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z/checkpoint
+  cls_weighed_loss: false
+  criterion_args: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      NAME: CrossEntropy
+      label_smoothing: 0.2
+  dataloader: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      num_workers: 6
+  dataset: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      common: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          NAME: S3DIS
+          data_root: /workspace/dataset/s3disfull
+          test_area: 5
+          voxel_size: 0.04
+      test: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          presample: false
+          split: test
+          voxel_max: null
+      train: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          loop: 30
+          presample: false
+          split: train
+          voxel_max: 24000
+      val: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          presample: true
+          split: val
+          voxel_max: null
+  datatransforms: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      kwargs: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          angle:
+          - 0
+          - 0
+          - 1
+          color_drop: 0.2
+          gravity_dim: 2
+          jitter_clip: 0.02
+          jitter_sigma: 0.005
+          scale:
+          - 0.9
+          - 1.1
+      train:
+      - ChromaticAutoContrast
+      - PointsToTensor
+      - PointCloudScaling
+      - PointCloudXYZAlign
+      - PointCloudJitter
+      - ChromaticDropGPU
+      - ChromaticNormalize
+      val:
+      - PointsToTensor
+      - PointCloudXYZAlign
+      - ChromaticNormalize
+      vote:
+      - ChromaticDropGPU
+  deterministic: false
+  dist_backend: nccl
+  dist_url: tcp://localhost:8888
+  distributed: true
+  epoch: 0
+  epochs: 100
+  exp_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+  feature_keys: x,heights
+  finetune: false
+  grad_norm_clip: 10
+  ignore_index: null
+  is_training: true
+  launcher: mp
+  layer_decay: 0
+  load_path: null
+  local_rank: 0
+  log_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+  log_path: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z.log
+  logname: null
+  lr: 0.01
+  min_lr: 1.0e-05
+  mode: train
+  model: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      NAME: BaseSeg
+      cls_args: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          NAME: SegHead
+          in_channels: null
+          norm_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              norm: bn
+          num_classes: 13
+      decoder_args: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          NAME: PointNextDecoder
+      encoder_args: !!python/object/new:openpoints.utils.config.EasyConfig
+        dictitems:
+          NAME: PointNextEncoder
+          act_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              act: relu
+          aggr_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              feature_type: dp_fj
+              reduction: max
+          blocks:
+          - 1
+          - 1
+          - 1
+          - 1
+          - 1
+          conv_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              order: conv-norm-act
+          expansion: 4
+          group_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              NAME: ballquery
+              normalize_dp: true
+          in_channels: 4
+          norm_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              norm: bn
+          nsample: 32
+          radius: 0.1
+          sa_layers: 2
+          sa_use_res: true
+          sampler: kdtree
+          sampler_args: !!python/object/new:openpoints.utils.config.EasyConfig
+            dictitems:
+              leaf_size: 12000
+              proportional: true
+              strategy: fps
+          strides:
+          - 1
+          - 4
+          - 4
+          - 4
+          - 4
+          width: 32
+  mp: true
+  multiprocessing_distributed: false
+  ngpus_per_node: 1
+  num_classes: 13
+  optimizer: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      NAME: adamw
+      weight_decay: 0.0001
+  opts: seed=7895
+  pretrained_path: null
+  print_freq: 50
+  rank: 0
+  resume: false
+  root_dir: log/s3dis
+  run_dir: log/s3dis/s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+  run_name: s3dis-train-pointnext-s_kdtree12000fps-ngpus3-20260317-224437-oAGCV34kBboJXpMa58JK2z
+  save_freq: -1
+  sched: cosine
+  sched_on_epoch: true
+  seed: 7895
+  start_epoch: 1
+  step_per_update: 1
+  sync_bn: true
+  task_name: s3dis
+  test: false
+  use_amp: false
+  use_gpu: true
+  use_mask: false
+  use_voting: false
+  val_batch_size: 1
+  val_fn: validate
+  val_freq: 1
+  wandb: !!python/object/new:openpoints.utils.config.EasyConfig
+    dictitems:
+      project: PointNeXt-S3DIS
+      tags:
+      - s3dis
+      - train
+      - pointnext-s_kdtree12000fps
+      - ngpus3
+      use_wandb: false
+  warmup_epochs: 0
+  world_size: 3
