@@ -611,3 +611,4 @@ mious: [90.56 96.87 77.64  0.   19.43 42.91 63.09 76.77 84.73 52.31 70.67 56.77
 [03/22 20:41:01] S3DIS INFO: Epoch 77 LR 0.001364 train_miou 87.23, val_miou 59.16, best val miou 60.27
 [03/22 20:48:04] S3DIS INFO: Epoch 78 LR 0.001258 train_miou 87.56, val_miou 59.12, best val miou 60.27
 [03/22 20:55:07] S3DIS INFO: Epoch 79 LR 0.001156 train_miou 87.64, val_miou 59.81, best val miou 60.27
+[03/22 21:02:11] S3DIS INFO: Epoch 80 LR 0.001058 train_miou 87.60, val_miou 59.27, best val miou 60.27
