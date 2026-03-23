@@ -39,29 +39,6 @@ done
 
 mkdir -p "$LOG_DIR"
 
-# ============== 实验定义 ==============
-# 格式: "TASK|CFG_BASE|CFG_KDTREE|DATASET|LEAF_SIZES|ENTRY_POINT"
-#
-# 各数据集点数:
-#   S3DIS:      voxel_max=24000
-#   ScanNet:    voxel_max=64000
-#   ShapeNet:   num_points=2048
-#   ModelNet40: num_points=1024
-
-declare -a EXPERIMENTS=(
-    # ===== S3DIS (已有大量结果, 补充 random 策略) =====
-    "segmentation|cfgs/s3dis/pointnext-s.yaml|cfgs/s3dis/pointnext-s_kdtree84fps.yaml|s3dis|325,750,1500,3000|examples/segmentation/main.py"
-
-    # ===== ScanNet =====
-    "segmentation|cfgs/scannet/pointnext-s.yaml|cfgs/scannet/pointnext-s_kdtree.yaml|scannet|500,2000,4000,8000,16000,32000,64000|examples/segmentation/main.py"
-
-    # ===== ShapeNetPart =====
-    "partseg|cfgs/shapenetpart/pointnext-s.yaml|cfgs/shapenetpart/pointnext-s_kdtree.yaml|shapenetpart|64,128,256,512,1024,2048|examples/shapenetpart/main.py"
-
-    # ===== ModelNet40 =====
-    "classification|cfgs/modelnet40ply2048/pointnext-s.yaml|cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml|modelnet40|32,64,128,256,512,1024|examples/classification/main.py"
-)
-
 # ============== 运行函数 ==============
 run_experiment() {
     local desc="$1"
@@ -105,53 +82,10 @@ TOTAL=0
 COMPLETED=0
 FAILED=0
 
-for exp in "${EXPERIMENTS[@]}"; do
-    IFS='|' read -r TASK CFG_BASE CFG_KDTREE DATASET LEAF_SIZES ENTRY_POINT <<< "$exp"
-
-    echo -e "\n${BLUE}========== $DATASET ($TASK) ==========${NC}"
-
-    # ----- 1. Baseline (原始 FPS) -----
-    TOTAL=$((TOTAL + 1))
-    DESC="${DATASET}_baseline_fps"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python $ENTRY_POINT --cfg $CFG_BASE seed=$SEED"
-    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-
-    run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-
-    # ----- 2. KD-Tree + FPS (各 leaf_size) -----
-    IFS=',' read -ra SIZES <<< "$LEAF_SIZES"
-    for LS in "${SIZES[@]}"; do
-        TOTAL=$((TOTAL + 1))
-        DESC="${DATASET}_kd_fps_leaf${LS}"
-        CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python $ENTRY_POINT --cfg $CFG_KDTREE model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
-        LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-
-        run_experiment "$DESC" "$CMD" "$LOG_FILE"
-        [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-    done
-
-    # ----- 3. KD-Tree + Random (选取中间 leaf_size) -----
-    # 选择 leaf_sizes 列表中间的两个值做 random 对比
-    NUM_SIZES=${#SIZES[@]}
-    MID1=$((NUM_SIZES / 3))
-    MID2=$((NUM_SIZES * 2 / 3))
-    RANDOM_SIZES="${SIZES[$MID1]},${SIZES[$MID2]}"
-
-    IFS=',' read -ra RSIZES <<< "$RANDOM_SIZES"
-    for LS in "${RSIZES[@]}"; do
-        TOTAL=$((TOTAL + 1))
-        DESC="${DATASET}_kd_random_leaf${LS}"
-        CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python $ENTRY_POINT --cfg $CFG_KDTREE model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
-        LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-
-        run_experiment "$DESC" "$CMD" "$LOG_FILE"
-        [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-    done
-done
-
-# ===== S3DIS random 补充实验 =====
-echo -e "\n${BLUE}========== S3DIS random 策略补充 ==========${NC}"
+# ============================================================
+# 1. S3DIS: 只跑 KD+Random (KD+FPS 已跑过)
+# ============================================================
+echo -e "\n${BLUE}========== S3DIS KD+Random ==========${NC}"
 S3DIS_RANDOM_SIZES="325,750,1500,3000"
 IFS=',' read -ra S3DIS_RS <<< "$S3DIS_RANDOM_SIZES"
 for LS in "${S3DIS_RS[@]}"; do
@@ -160,6 +94,120 @@ for LS in "${S3DIS_RS[@]}"; do
     CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/s3dis/pointnext-s_kdtree84fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 
+    run_experiment "$DESC" "$CMD" "$LOG_FILE"
+    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+done
+
+# ============================================================
+# 2. ScanNet: Baseline + KD+FPS + KD+Random
+#    voxel_max=64000, leaf_sizes 参考 S3DIS 比例缩放
+# ============================================================
+echo -e "\n${BLUE}========== ScanNet ==========${NC}"
+
+# Baseline
+TOTAL=$((TOTAL + 1))
+DESC="scannet_baseline_fps"
+CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s.yaml seed=$SEED"
+LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+run_experiment "$DESC" "$CMD" "$LOG_FILE"
+[ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+
+# KD+FPS
+SCANNET_FPS_SIZES="500,2000,4000,8000,16000,32000,64000"
+IFS=',' read -ra SCANNET_FS <<< "$SCANNET_FPS_SIZES"
+for LS in "${SCANNET_FS[@]}"; do
+    TOTAL=$((TOTAL + 1))
+    DESC="scannet_kd_fps_leaf${LS}"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
+    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+    run_experiment "$DESC" "$CMD" "$LOG_FILE"
+    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+done
+
+# KD+Random
+SCANNET_RANDOM_SIZES="2000,8000,32000"
+IFS=',' read -ra SCANNET_RS <<< "$SCANNET_RANDOM_SIZES"
+for LS in "${SCANNET_RS[@]}"; do
+    TOTAL=$((TOTAL + 1))
+    DESC="scannet_kd_random_leaf${LS}"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+    run_experiment "$DESC" "$CMD" "$LOG_FILE"
+    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+done
+
+# ============================================================
+# 3. ShapeNetPart: Baseline + KD+FPS + KD+Random
+#    num_points=2048
+# ============================================================
+echo -e "\n${BLUE}========== ShapeNetPart ==========${NC}"
+
+# Baseline
+TOTAL=$((TOTAL + 1))
+DESC="shapenetpart_baseline_fps"
+CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s.yaml seed=$SEED"
+LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+run_experiment "$DESC" "$CMD" "$LOG_FILE"
+[ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+
+# KD+FPS
+SHAPENET_FPS_SIZES="64,128,256,512,1024,2048"
+IFS=',' read -ra SHAPENET_FS <<< "$SHAPENET_FPS_SIZES"
+for LS in "${SHAPENET_FS[@]}"; do
+    TOTAL=$((TOTAL + 1))
+    DESC="shapenetpart_kd_fps_leaf${LS}"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
+    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+    run_experiment "$DESC" "$CMD" "$LOG_FILE"
+    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+done
+
+# KD+Random
+SHAPENET_RANDOM_SIZES="128,512,1024"
+IFS=',' read -ra SHAPENET_RS <<< "$SHAPENET_RANDOM_SIZES"
+for LS in "${SHAPENET_RS[@]}"; do
+    TOTAL=$((TOTAL + 1))
+    DESC="shapenetpart_kd_random_leaf${LS}"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+    run_experiment "$DESC" "$CMD" "$LOG_FILE"
+    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+done
+
+# ============================================================
+# 4. ModelNet40: Baseline + KD+FPS + KD+Random
+#    num_points=1024
+# ============================================================
+echo -e "\n${BLUE}========== ModelNet40 ==========${NC}"
+
+# Baseline
+TOTAL=$((TOTAL + 1))
+DESC="modelnet40_baseline_fps"
+CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s.yaml seed=$SEED"
+LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+run_experiment "$DESC" "$CMD" "$LOG_FILE"
+[ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+
+# KD+FPS
+MODELNET_FPS_SIZES="32,64,128,256,512,1024"
+IFS=',' read -ra MODELNET_FS <<< "$MODELNET_FPS_SIZES"
+for LS in "${MODELNET_FS[@]}"; do
+    TOTAL=$((TOTAL + 1))
+    DESC="modelnet40_kd_fps_leaf${LS}"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
+    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
+    run_experiment "$DESC" "$CMD" "$LOG_FILE"
+    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+done
+
+# KD+Random
+MODELNET_RANDOM_SIZES="64,256,512"
+IFS=',' read -ra MODELNET_RS <<< "$MODELNET_RANDOM_SIZES"
+for LS in "${MODELNET_RS[@]}"; do
+    TOTAL=$((TOTAL + 1))
+    DESC="modelnet40_kd_random_leaf${LS}"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
 done
