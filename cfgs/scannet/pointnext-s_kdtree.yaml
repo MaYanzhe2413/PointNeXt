@@ -1,0 +1,42 @@
+# PointNeXt-S with KD-Tree Sampling for ScanNet
+# voxel_max=64000, leaf_size/strategy can be overridden via CLI
+
+model:
+  NAME: BaseSeg
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1]
+    strides: [1, 4, 4, 4, 4]
+    sa_layers: 3
+    sa_use_res: False
+    width: 32
+    in_channels: 7
+    expansion: 4
+    radius: 0.05
+    nsample: 32
+    sampler: kdtree
+    sampler_args:
+      leaf_size: 4000
+      strategy: fps
+      proportional: true
+    aggr_args:
+      feature_type: 'dp_fj'
+      reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  decoder_args:
+    NAME: PointNextDecoder
+  cls_args:
+    NAME: SegHead
+    num_classes: 20
+    global_feat: max
+    in_channels: null
+    norm_args:
+      norm: 'bn'

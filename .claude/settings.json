@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for d:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt/datatobeupload/$d/**)",
+      "Bash(done)",
+      "Bash(python -c \"import pptx; print\\(pptx.__version__\\)\")",
+      "Read(//c/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt/$d/**)",
+      "Bash(python:*)",
+      "Read(//workspace/dataset/shapenetcore_partanno_segmentation_benchmark_v0/**)",
+      "Bash(chmod +x \"c:/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt/batch_experiment.sh\")"
+    ]
+  }
+}

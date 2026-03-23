@@ -1,0 +1,69 @@
+# PointNeXt-S with KD-Tree Sampling for ShapeNetPart
+# num_points=2048, leaf_size/strategy can be overridden via CLI
+
+model:
+  NAME: BasePartSeg
+  encoder_args:
+    NAME: PointNextEncoder
+    blocks: [1, 1, 1, 1, 1]
+    strides: [1, 2, 2, 2, 2]
+    width: 32
+    in_channels: 7
+    sa_layers: 3
+    sa_use_res: True
+    radius: 0.1
+    radius_scaling: 2.5
+    nsample: 32
+    expansion: 4
+    sampler: kdtree
+    sampler_args:
+      leaf_size: 256
+      strategy: fps
+      proportional: true
+    aggr_args:
+      feature_type: 'dp_fj'
+    reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      normalize_dp: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  decoder_args:
+    NAME: PointNextPartDecoder
+    cls_map: curvenet
+  cls_args:
+    NAME: SegHead
+    global_feat: max,avg
+    num_classes: 50
+    in_channels: null
+    norm_args:
+      norm: 'bn'
+
+lr: 0.001
+min_lr: null
+optimizer:
+  NAME: adamw
+  weight_decay: 1.0e-4
+
+criterion_args:
+  NAME: Poly1FocalLoss
+
+epochs: 300
+sched: multistep
+decay_epochs: [210, 270]
+decay_rate: 0.1
+warmup_epochs: 0
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter, ChromaticDropGPU]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
+    angle: [0, 1.0, 0]

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt -name *create_grouper* -type f)"
+    ]
+  }
+}
