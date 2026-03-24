@@ -404,7 +404,7 @@ if __name__ == "__main__":
     # logger
     # init log dir
     cfg.task_name = args.cfg.split('.')[-2].split('/')[-2]  # task/dataset name, \eg s3dis, modelnet40_cls
-    cfg.cfg_basename = args.cfg.split('.')[-2].split('/')[-1]  # cfg_basename, \eg pointnext-xl
+    cfg.cfg_basename = cfg.get('cfg_basename', args.cfg.split('.')[-2].split('/')[-1])  # CLI override or from cfg filename
     tags = [
         cfg.task_name,  # task name (the folder of name under ./cfgs
         cfg.mode,
