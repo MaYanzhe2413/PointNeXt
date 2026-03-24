@@ -91,7 +91,7 @@ IFS=',' read -ra S3DIS_RS <<< "$S3DIS_RANDOM_SIZES"
 for LS in "${S3DIS_RS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="s3dis_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/s3dis/pointnext-s_kdtree84fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/s3dis/pointnext-s_kdtree84fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED job_name=pointnext-s_kdtree${LS}random"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
@@ -107,7 +107,7 @@ echo -e "\n${BLUE}========== ScanNet ==========${NC}"
 # Baseline
 TOTAL=$((TOTAL + 1))
 DESC="scannet_baseline_fps"
-CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s.yaml seed=$SEED"
+CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s.yaml seed=$SEED job_name=pointnext-s_baseline"
 LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 run_experiment "$DESC" "$CMD" "$LOG_FILE"
 [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -118,7 +118,7 @@ IFS=',' read -ra SCANNET_FS <<< "$SCANNET_FPS_SIZES"
 for LS in "${SCANNET_FS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="scannet_kd_fps_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED job_name=pointnext-s_kdtree${LS}fps"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -130,7 +130,7 @@ IFS=',' read -ra SCANNET_RS <<< "$SCANNET_RANDOM_SIZES"
 for LS in "${SCANNET_RS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="scannet_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED job_name=pointnext-s_kdtree${LS}random"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -145,7 +145,7 @@ echo -e "\n${BLUE}========== ShapeNetPart ==========${NC}"
 # Baseline
 TOTAL=$((TOTAL + 1))
 DESC="shapenetpart_baseline_fps"
-CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s.yaml seed=$SEED"
+CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s.yaml seed=$SEED job_name=pointnext-s_baseline"
 LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 run_experiment "$DESC" "$CMD" "$LOG_FILE"
 [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -156,7 +156,7 @@ IFS=',' read -ra SHAPENET_FS <<< "$SHAPENET_FPS_SIZES"
 for LS in "${SHAPENET_FS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="shapenetpart_kd_fps_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED job_name=pointnext-s_kdtree${LS}fps"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -168,7 +168,7 @@ IFS=',' read -ra SHAPENET_RS <<< "$SHAPENET_RANDOM_SIZES"
 for LS in "${SHAPENET_RS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="shapenetpart_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED job_name=pointnext-s_kdtree${LS}random"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -183,7 +183,7 @@ echo -e "\n${BLUE}========== ModelNet40 ==========${NC}"
 # Baseline
 TOTAL=$((TOTAL + 1))
 DESC="modelnet40_baseline_fps"
-CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s.yaml seed=$SEED"
+CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s.yaml seed=$SEED job_name=pointnext-s_baseline"
 LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 run_experiment "$DESC" "$CMD" "$LOG_FILE"
 [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -194,7 +194,7 @@ IFS=',' read -ra MODELNET_FS <<< "$MODELNET_FPS_SIZES"
 for LS in "${MODELNET_FS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="modelnet40_kd_fps_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED job_name=pointnext-s_kdtree${LS}fps"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
@@ -206,7 +206,7 @@ IFS=',' read -ra MODELNET_RS <<< "$MODELNET_RANDOM_SIZES"
 for LS in "${MODELNET_RS[@]}"; do
     TOTAL=$((TOTAL + 1))
     DESC="modelnet40_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED"
+    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED job_name=pointnext-s_kdtree${LS}random"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
     [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
