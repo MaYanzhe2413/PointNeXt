@@ -14,7 +14,11 @@
       "Bash(curl -L -o \"c:/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt/shapenetcore_partanno_segmentation_benchmark_v0_normal.zip\" \"https://huggingface.co/datasets/ShapeNet/shapenetcore-partanno-segmentation-benchmark-v0-normal/resolve/main/shapenetcore_partanno_segmentation_benchmark_v0_normal.zip\" --progress-bar --connect-timeout 15)",
       "Bash(curl -L -o \"c:/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt/shapenet_normal.zip\" \"https://shapenet.cs.stanford.edu/media/shapenetcore_partanno_segmentation_benchmark_v0_normal.zip\" --connect-timeout 30 --max-time 600 --progress-bar)",
       "Bash(pip install:*)",
-      "Bash(gdown 1wMtNGvliK_pUjpo9mol1MPatSj_7ECPZ -O shapenet_normal.zip)"
+      "Bash(gdown 1wMtNGvliK_pUjpo9mol1MPatSj_7ECPZ -O shapenet_normal.zip)",
+      "WebSearch",
+      "Bash(grep -r \"segment20\\\\|segment200\" /c/Users/ziqih/Documents/AAA_Yanzhe/PointNeXt --include=*.py)",
+      "WebFetch(domain:github.com)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

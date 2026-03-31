@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# 批量实验脚本: KD-Tree Sampling 跨数据集对比
+# 批量实验脚本: 剩余未完成实验
 # 用法: ./batch_experiment.sh [--dry-run] [--gpu GPU_IDS] [--seed SEED]
 # ============================================================================
 
@@ -71,7 +71,7 @@ run_experiment() {
 
 # ============== 开始实验 ==============
 echo -e "${BLUE}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║          批量 KD-Tree Sampling 实验             ║${NC}"
+echo -e "${BLUE}║       批量实验 (剩余: S3DIS random + ModelNet40)  ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════════╝${NC}"
 echo -e "${GREEN}GPU:${NC}  $GPU_IDS"
 echo -e "${GREEN}Seed:${NC} $SEED"
@@ -81,9 +81,11 @@ echo ""
 TOTAL=0
 COMPLETED=0
 FAILED=0
+FAILED_LIST=""
+COMPLETED_LIST=""
 
 # ============================================================
-# 1. S3DIS: 只跑 KD+Random (KD+FPS 已跑过)
+# 1. S3DIS: KD+Random (如果已跑完会覆盖log，可跳过)
 # ============================================================
 echo -e "\n${BLUE}========== S3DIS KD+Random ==========${NC}"
 S3DIS_RANDOM_SIZES="325,750,1500,3000"
@@ -95,88 +97,12 @@ for LS in "${S3DIS_RS[@]}"; do
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+    if [ $? -eq 0 ]; then COMPLETED=$((COMPLETED + 1)); COMPLETED_LIST="$COMPLETED_LIST\n  $DESC"; else FAILED=$((FAILED + 1)); FAILED_LIST="$FAILED_LIST\n  $DESC"; fi
 done
 
 # ============================================================
-# 2. ScanNet: Baseline + KD+FPS + KD+Random
-#    voxel_max=64000, leaf_sizes 参考 S3DIS 比例缩放
-# ============================================================
-echo -e "\n${BLUE}========== ScanNet ==========${NC}"
-
-# Baseline
-TOTAL=$((TOTAL + 1))
-DESC="scannet_baseline_fps"
-CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s.yaml seed=$SEED cfg_basename=pointnext-s_baseline"
-LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-run_experiment "$DESC" "$CMD" "$LOG_FILE"
-[ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-
-# KD+FPS
-SCANNET_FPS_SIZES="500,2000,4000,8000,16000,32000,64000"
-IFS=',' read -ra SCANNET_FS <<< "$SCANNET_FPS_SIZES"
-for LS in "${SCANNET_FS[@]}"; do
-    TOTAL=$((TOTAL + 1))
-    DESC="scannet_kd_fps_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED cfg_basename=pointnext-s_kdtree${LS}fps"
-    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-    run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-done
-
-# KD+Random
-SCANNET_RANDOM_SIZES="2000,8000,32000"
-IFS=',' read -ra SCANNET_RS <<< "$SCANNET_RANDOM_SIZES"
-for LS in "${SCANNET_RS[@]}"; do
-    TOTAL=$((TOTAL + 1))
-    DESC="scannet_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/scannet/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED cfg_basename=pointnext-s_kdtree${LS}random"
-    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-    run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-done
-
-# ============================================================
-# 3. ShapeNetPart: Baseline + KD+FPS + KD+Random
-#    num_points=2048
-# ============================================================
-echo -e "\n${BLUE}========== ShapeNetPart ==========${NC}"
-
-# Baseline
-TOTAL=$((TOTAL + 1))
-DESC="shapenetpart_baseline_fps"
-CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s.yaml seed=$SEED cfg_basename=pointnext-s_baseline"
-LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-run_experiment "$DESC" "$CMD" "$LOG_FILE"
-[ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-
-# KD+FPS
-SHAPENET_FPS_SIZES="64,128,256,512,1024,2048"
-IFS=',' read -ra SHAPENET_FS <<< "$SHAPENET_FPS_SIZES"
-for LS in "${SHAPENET_FS[@]}"; do
-    TOTAL=$((TOTAL + 1))
-    DESC="shapenetpart_kd_fps_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED cfg_basename=pointnext-s_kdtree${LS}fps"
-    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-    run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-done
-
-# KD+Random
-SHAPENET_RANDOM_SIZES="128,512,1024"
-IFS=',' read -ra SHAPENET_RS <<< "$SHAPENET_RANDOM_SIZES"
-for LS in "${SHAPENET_RS[@]}"; do
-    TOTAL=$((TOTAL + 1))
-    DESC="shapenetpart_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/shapenetpart/main.py --cfg cfgs/shapenetpart/pointnext-s_kdtree.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED cfg_basename=pointnext-s_kdtree${LS}random"
-    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-    run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
-done
-
-# ============================================================
-# 4. ModelNet40: Baseline + KD+FPS + KD+Random
-#    num_points=1024
+# 2. ModelNet40: Baseline + KD+FPS + KD+Random
+#    num_points=1024 (数据软链接已建好)
 # ============================================================
 echo -e "\n${BLUE}========== ModelNet40 ==========${NC}"
 
@@ -186,7 +112,7 @@ DESC="modelnet40_baseline_fps"
 CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s.yaml seed=$SEED cfg_basename=pointnext-s_baseline"
 LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
 run_experiment "$DESC" "$CMD" "$LOG_FILE"
-[ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+if [ $? -eq 0 ]; then COMPLETED=$((COMPLETED + 1)); COMPLETED_LIST="$COMPLETED_LIST\n  $DESC"; else FAILED=$((FAILED + 1)); FAILED_LIST="$FAILED_LIST\n  $DESC"; fi
 
 # KD+FPS
 MODELNET_FPS_SIZES="32,64,128,256,512,1024"
@@ -197,7 +123,7 @@ for LS in "${MODELNET_FS[@]}"; do
     CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=fps seed=$SEED cfg_basename=pointnext-s_kdtree${LS}fps"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+    if [ $? -eq 0 ]; then COMPLETED=$((COMPLETED + 1)); COMPLETED_LIST="$COMPLETED_LIST\n  $DESC"; else FAILED=$((FAILED + 1)); FAILED_LIST="$FAILED_LIST\n  $DESC"; fi
 done
 
 # KD+Random
@@ -209,7 +135,7 @@ for LS in "${MODELNET_RS[@]}"; do
     CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/classification/main.py --cfg cfgs/modelnet40ply2048/pointnext-s_kdtree_fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED cfg_basename=pointnext-s_kdtree${LS}random"
     LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
     run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    [ $? -eq 0 ] && COMPLETED=$((COMPLETED + 1)) || FAILED=$((FAILED + 1))
+    if [ $? -eq 0 ]; then COMPLETED=$((COMPLETED + 1)); COMPLETED_LIST="$COMPLETED_LIST\n  $DESC"; else FAILED=$((FAILED + 1)); FAILED_LIST="$FAILED_LIST\n  $DESC"; fi
 done
 
 # ============== 汇总 ==============
@@ -220,5 +146,13 @@ echo -e "${GREEN}总计:${NC}   $TOTAL"
 echo -e "${GREEN}完成:${NC}   $COMPLETED"
 echo -e "${RED}失败:${NC}   $FAILED"
 echo ""
+if [ -n "$COMPLETED_LIST" ]; then
+    echo -e "${GREEN}完成的实验:${NC}$COMPLETED_LIST"
+    echo ""
+fi
+if [ -n "$FAILED_LIST" ]; then
+    echo -e "${RED}失败的实验:${NC}$FAILED_LIST"
+    echo ""
+fi
 echo -e "${YELLOW}日志目录: $LOG_DIR/${NC}"
 echo -e "${YELLOW}提取结果: grep -h 'best val miou\|best acc' $LOG_DIR/*.log${NC}"
