@@ -85,23 +85,7 @@ FAILED_LIST=""
 COMPLETED_LIST=""
 
 # ============================================================
-# 1. S3DIS: KD+Random (如果已跑完会覆盖log，可跳过)
-# ============================================================
-echo -e "\n${BLUE}========== S3DIS KD+Random ==========${NC}"
-S3DIS_RANDOM_SIZES="325,750,1500,3000"
-IFS=',' read -ra S3DIS_RS <<< "$S3DIS_RANDOM_SIZES"
-for LS in "${S3DIS_RS[@]}"; do
-    TOTAL=$((TOTAL + 1))
-    DESC="s3dis_kd_random_leaf${LS}"
-    CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py --cfg cfgs/s3dis/pointnext-s_kdtree84fps.yaml model.encoder_args.sampler_args.leaf_size=$LS model.encoder_args.sampler_args.strategy=random seed=$SEED cfg_basename=pointnext-s_kdtree${LS}random"
-    LOG_FILE="$LOG_DIR/${DESC}_seed${SEED}.log"
-
-    run_experiment "$DESC" "$CMD" "$LOG_FILE"
-    if [ $? -eq 0 ]; then COMPLETED=$((COMPLETED + 1)); COMPLETED_LIST="$COMPLETED_LIST\n  $DESC"; else FAILED=$((FAILED + 1)); FAILED_LIST="$FAILED_LIST\n  $DESC"; fi
-done
-
-# ============================================================
-# 2. ModelNet40: Baseline + KD+FPS + KD+Random
+# ModelNet40: Baseline + KD+FPS + KD+Random
 #    num_points=1024 (数据软链接已建好)
 # ============================================================
 echo -e "\n${BLUE}========== ModelNet40 ==========${NC}"
