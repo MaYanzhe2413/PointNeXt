@@ -27,6 +27,7 @@ MODE="test"          # test = 方案A; train = 方案B
 DRY_RUN=false
 LOG_DIR="experiment_logs"
 BITS="0 8 7 6 5 4"   # 0 = FP32 baseline
+EXTRA=""             # 额外的 config 覆盖 (如 sampler 参数), 需匹配 checkpoint
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -37,6 +38,7 @@ while [ $# -gt 0 ]; do
         --cfg|-c) CFG="$2"; shift 2 ;;
         --train) MODE="train"; shift ;;
         --bits) BITS="$2"; shift 2 ;;
+        --extra) EXTRA="$2"; shift 2 ;;
         --log-dir) LOG_DIR="$2"; shift 2 ;;
         -h|--help)
             echo "坐标量化敏感度实验"
@@ -50,6 +52,7 @@ while [ $# -gt 0 ]; do
             echo "  -g, --gpu         GPU 编号 (默认: 0)"
             echo "  -S, --seed        随机种子 (默认: 7895)"
             echo "  --bits            要测的 bit 宽度 (默认: '0 8 7 6 5 4')"
+            echo "  --extra           额外 config 覆盖 (需匹配 checkpoint 的 sampler 参数)"
             echo "  --train           方案B: 从头训练而非测试"
             echo "  --dry-run         只打印命令"
             exit 0 ;;
@@ -118,6 +121,7 @@ for NB in $BITS; do
             mode=test \
             --pretrained_path $PRETRAINED \
             model.encoder_args.coord_nbits=$NB \
+            $EXTRA \
             seed=$SEED \
             cfg_basename=coord_quant_${TAG}"
     else
@@ -125,6 +129,7 @@ for NB in $BITS; do
         CMD="CUDA_VISIBLE_DEVICES=$GPU_IDS python examples/segmentation/main.py \
             --cfg $CFG \
             model.encoder_args.coord_nbits=$NB \
+            $EXTRA \
             seed=$SEED \
             cfg_basename=coord_quant_train_${TAG}"
     fi
