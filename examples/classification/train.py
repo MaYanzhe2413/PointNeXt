@@ -116,7 +116,7 @@ def main(gpu, cfg, profile=False):
                  f"number of points sampled from dataset: {num_points}, "
                  f"number of points as model input: {cfg.num_points}")
     cfg.classes = cfg.get('classes', None) or val_loader.dataset.classes if hasattr(
-        val_loader.dataset, 'classes') else None or np.range(num_classes)
+        val_loader.dataset, 'classes') else None or np.arange(num_classes)
     validate_fn = eval(cfg.get('val_fn', 'validate'))
 
     # optionally resume from a checkpoint

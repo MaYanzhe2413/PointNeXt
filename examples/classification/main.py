@@ -73,7 +73,9 @@ if __name__ == "__main__":
     #  Experiment folder / logging
     # ----------------------------------------------------------------------
     cfg.task_name = args.cfg.split(".")[-2].split("/")[-2]
-    cfg.exp_name = args.cfg.split(".")[-2].split("/")[-1]
+    # honor CLI override (cfg_basename=) for consistent log-dir naming across tasks
+    cfg.exp_name = cfg.get('cfg_basename', args.cfg.split(".")[-2].split("/")[-1])
+    cfg.cfg_basename = cfg.exp_name
 
     tags = [
         cfg.task_name,
