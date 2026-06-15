@@ -1,0 +1,74 @@
+# PointNet++ (MSG-style SSG) for ShapeNetPart part segmentation.
+# Encoder mirrors cfgs/s3dis/pointnet++.yaml (proven channel structure);
+# decoder uses PointNet2PartDecoder (consumes the 16-class object label).
+# NOTE: architecture (radius/strides) is a reasonable default modeled on the
+# classic PointNet++ part-seg + the s3dis pointnet++ encoder. Smoke-test
+# (build + 1 forward) before a full training run — see TRAINING note at bottom.
+model:
+  NAME: BasePartSeg
+  encoder_args:
+    NAME: PointNet2Encoder
+    in_channels: 7        # pos(3) + normal(3) + height(1), matches pointnext-s shapenetpart
+    width: null
+    strides: [4, 4, 4, 4]
+    layers: 3
+    use_res: False
+    mlps: [[[32, 32, 64]],    # stage 1 -> 64
+        [[64, 64, 128]],      # stage 2 -> 128
+        [[128, 128, 256]],    # stage 3 -> 256
+        [[256, 256, 512]]]    # stage 4 -> 512
+    radius: 0.1
+    radius_scaling: 2
+    num_samples: 32
+    sampler: fps
+    aggr_args:
+      NAME: 'convpool'
+      feature_type: 'dp_fj'
+      anisotropic: False
+      reduction: 'max'
+    group_args:
+      NAME: 'ballquery'
+      use_xyz: True
+    conv_args:
+      order: conv-norm-act
+    act_args:
+      act: 'relu'
+    norm_args:
+      norm: 'bn'
+  decoder_args:
+    NAME: PointNet2PartDecoder
+    fp_mlps: [[128, 128, 128], [256, 128], [256, 256], [256, 256]]
+  cls_args:
+    NAME: SegHead
+    num_classes: 50
+    in_channels: null
+    norm_args:
+      norm: 'bn'
+
+# ---------------------------------------------------------------------------- #
+# Training cfgs (mirror cfgs/shapenetpart/pointnext-s.yaml)
+# ---------------------------------------------------------------------------- #
+lr: 0.001
+min_lr: null
+optimizer:
+  NAME: adamw
+  weight_decay: 1.0e-4
+
+criterion_args:
+  NAME: Poly1FocalLoss
+
+epochs: 300
+sched: multistep
+decay_epochs: [210, 270]
+decay_rate: 0.1
+warmup_epochs: 0
+
+datatransforms:
+  train: [PointsToTensor, PointCloudScaling, PointCloudCenterAndNormalize, PointCloudJitter, ChromaticDropGPU]
+  val: [PointsToTensor, PointCloudCenterAndNormalize]
+  kwargs:
+    jitter_sigma: 0.001
+    jitter_clip: 0.005
+    scale: [0.8, 1.2]
+    gravity_dim: 1
+    angle: [0, 1.0, 0]
