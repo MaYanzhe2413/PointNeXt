@@ -29,7 +29,7 @@ CKPT_PNX_SHAPE="log/shapenetpart/shapenetpart-train-pointnext-s-ngpus2-seed7895-
 # PointNet++ (全局 FPS 训练)
 CKPT_PN2_S3DIS="log/s3dis/s3dis-train-pointnet++-ngpus3-20260615-103940-kKwLcsaKbXWhfZuMKrxcNt"
 CKPT_PN2_MN40="log/modelnet40ply2048/modelnet40ply2048-train-pointnet++-ngpus4-seed527-20250914-155417-bebhZhPnyPhBmLNisKNyQG"
-CKPT_PN2_SHAPE=""   # TODO: ShapeNet PN++ 训完填这里
+CKPT_PN2_SHAPE="log/shapenetpart/shapenetpart-train-pointnet++-ngpus2-seed7895-20260615-220231-6DEjnjKUveG6UEHbGkyF4z"
 
 # ---------------- data_root override (默认空=用 config 默认; 换机器时填) ----------------
 DR_S3DIS=""       # e.g. /workspace/dataset/s3disfull
