@@ -65,7 +65,8 @@ def evaluate_seg(model, loader, cfg, tag="FP32"):
             cm.update(logits.argmax(dim=1), data["y"].squeeze(-1))
     miou, macc, oa, ious, _ = get_mious(cm.tp, cm.union, cm.count)
     logger.info("[%s] mIoU=%.2f  OA=%.2f  mAcc=%.2f  (%.1fs)", tag, miou, oa, macc, time.time() - t0)
-    return {"primary": miou, "miou": miou, "oa": oa, "macc": macc}
+    return {"primary": miou, "miou": miou, "oa": oa, "macc": macc,
+            "ious": [round(float(x), 2) for x in ious]}
 
 
 def evaluate_cls(model, loader, cfg, tag="FP32"):
@@ -138,6 +139,8 @@ def main():
     parser.add_argument("--calib-batches", type=int, default=30)
     parser.add_argument("--out", default="quant/output")
     parser.add_argument("--tag", default=None, help="label for output file")
+    parser.add_argument("--quant-mode", default="w8a8", choices=["w8a8", "w8a32", "w32a8"],
+                        help="w8a8=both, w8a32=weights only, w32a8=activations only (diagnostic)")
     args, opts = parser.parse_known_args()   # extra opts -> cfg.update (sampler / data_root)
 
     os.makedirs(args.out, exist_ok=True)
@@ -214,9 +217,22 @@ def main():
             model(data)
 
     # ----- Phase 2: INT8-sim eval -----
-    logger.info("[Phase 2] INT8-sim eval")
+    logger.info("[Phase 2] INT8-sim eval (mode=%s)", args.quant_mode)
     model.apply(quant.enable_fake_quant)
     model.apply(quant.disable_observer)
+    # W/A decomposition: selectively disable one fake-quant group (diagnostic)
+    if args.quant_mode != "w8a8":
+        from torch.quantization import FakeQuantize
+        n_w, n_a = 0, 0
+        for name, m in model.named_modules():
+            if isinstance(m, FakeQuantize):
+                is_weight = "weight_fake_quant" in name
+                if args.quant_mode == "w8a32" and not is_weight:
+                    m.disable_fake_quant(); n_a += 1     # keep weights, drop activations
+                elif args.quant_mode == "w32a8" and is_weight:
+                    m.disable_fake_quant(); n_w += 1     # keep activations, drop weights
+        logger.info("  [%s] disabled fake_quant on %d weight + %d act modules",
+                    args.quant_mode, n_w, n_a)
     res_int8 = eval_fn(model, val_loader, cfg, tag="INT8-sim")
 
     # ----- summary -----
@@ -225,9 +241,20 @@ def main():
     logger.info("SUMMARY (task=%s)", args.task)
     logger.info("  FP32        = %.2f", p0)
     logger.info("  FP32-fused  = %.2f   (BN-fold delta %+.2f)", pf, pf - p0)
-    logger.info("  INT8-sim    = %.2f   (quant delta %+.2f, total %+.2f)", pi, pi - pf, pi - p0)
+    logger.info("  INT8-sim    = %.2f   (quant delta %+.2f, total %+.2f)  mode=%s",
+                pi, pi - pf, pi - p0, args.quant_mode)
+    # per-class IoU delta for seg (which classes drive the drop)
+    if args.task == "seg" and "ious" in res_fp32 and "ious" in res_int8:
+        deltas = [(i, a, b, round(b - a, 2))
+                  for i, (a, b) in enumerate(zip(res_fp32["ious"], res_int8["ious"]))]
+        worst = sorted(deltas, key=lambda x: x[3])[:5]
+        logger.info("  per-class IoU (FP32->INT8), 5 worst drops:")
+        for i, a, b, d in worst:
+            logger.info("    class %2d: %.2f -> %.2f  (%+.2f)", i, a, b, d)
 
     tag = args.tag or (os.path.splitext(os.path.basename(args.cfg))[0] + "_" + args.task)
+    if args.quant_mode != "w8a8":
+        tag = f"{tag}_{args.quant_mode}"
     out_path = os.path.join(args.out, f"ptq_{tag}.json")
     with open(out_path, "w") as f:
         json.dump({
