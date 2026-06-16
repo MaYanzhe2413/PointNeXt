@@ -36,6 +36,7 @@ LEAF=""          # 留空则按数据集自动选
 DRY_RUN=false
 DO_SWEEP=false
 LOG_DIR="experiment_logs"
+GLOBAL_EXTRA=""  # 追加到每个实验的 cfg 覆盖 (如 data_root)
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -46,6 +47,7 @@ while [ $# -gt 0 ]; do
         --seed|-S) SEED="$2"; shift 2 ;;
         --pretrained|-p) PRETRAINED="$2"; shift 2 ;;
         --leaf|-L) LEAF="$2"; shift 2 ;;
+        --extra) GLOBAL_EXTRA="$2"; shift 2 ;;
         --sweep) DO_SWEEP=true; shift ;;
         --dry-run) DRY_RUN=true; shift ;;
         --log-dir) LOG_DIR="$2"; shift 2 ;;
@@ -102,7 +104,7 @@ run_exp() {
     local desc="$1"; local extra="$2"
     local tag="${PREFIX}_${desc}"
     local log="$LOG_DIR/${tag}_seed${SEED}.log"
-    local cmd="CUDA_VISIBLE_DEVICES=$GPU_IDS python $MAIN --cfg $CFG mode=test --pretrained_path $PRETRAINED $extra seed=$SEED cfg_basename=$tag"
+    local cmd="CUDA_VISIBLE_DEVICES=$GPU_IDS python $MAIN --cfg $CFG mode=test --pretrained_path $PRETRAINED $extra $GLOBAL_EXTRA seed=$SEED cfg_basename=$tag"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${GREEN}实验: ${NC}$tag"
     echo -e "${YELLOW}命令: ${NC}$cmd"
